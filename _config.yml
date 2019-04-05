@@ -1,0 +1,6 @@
+theme: jekyll-theme-cayman
+title: Practical Open-Loop Optimistic Planning
+description: Edouard Leurent, Odalric-Ambrym Maillard
+
+github:
+  repository_url: http://github.com/eleurent/rl-agents
