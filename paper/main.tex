@@ -25,6 +25,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{calc}
+\usepackage{bbm}
 \usepackage{mathtools}
 \usepackage{bbm}
 \usepackage{multirow}
@@ -81,7 +82,7 @@ In a \emph{Markov Decision Process} (MDP), an agent observes its current state $
 \paragraph{Contributions} The goal of this paper is to study the practical performances of \OLOP when applied to numerical problems. Indeed, \OLOP was introduced along with a theoretical sample complexity analysis but no experiment was carried-out. Our contribution is threefold:
 
 \begin{itemize}
-    \item First, we show that in our experiments \OLOP is overly pessimistic, especially in the low-budget regime, and we provide an intuitive explanation by showcasing an unintended effect that alters the behaviour of \OLOP.
+    \item First, we show that in our experiments \OLOP is overly pessimistic, especially in the low-budget regime, and we provide an intuitive explanation by casting light on an unintended effect that alters the behaviour of \OLOP.
     \item Second, we circumvent this issue by leveraging modern tools from the bandits literature to design and analyse a modified version with tighter upper-confidence bounds called \KLOLOP. We show that we retain the asymptotic regret bounds of $\OLOP$ while improving its performances by an order of magnitude in numerical experiments.
     \item Third, we provide a time and memory efficient implementation of \OLOP and \KLOLOP, bringing an exponential speedup that allows to scale these algorithms to high sample budgets.
 \end{itemize}
@@ -206,7 +207,7 @@ Indeed, in this case $U^{\mu}_a(m)$ can then be explicitly computed as:
 which is the Chernoff-Hoeffding bound used originally in section 3.1 of \cite{Bubeck2010}.
 
 \subsection{An unintended behaviour}
-
+\label{sec:kl-olop-behaviour}
 From the definition of $U_a(m)$ as an upper-bound of the value of the sequence $a$, we expect increasing sequences $(a_{1:t})_t$ to have non-increasing upper-bounds. Indeed, every new action $a_t$ encountered along the sequence is a potential loss of optimality.
 However, this property is only true if the upper-bound defined in \eqref{eq:u_mu_a_m} belongs to the reward interval $[0,1]$.
 
@@ -592,13 +593,12 @@ Finally,
     \begin{equation*}
         \expectedvalue r_n = \tilde{O}\left(M^{-\frac{1}{2}} + M^{-\frac{1}{2}} + M^{-\frac{1}{2}}M^{\frac{\log \kappa'}{2\log 1/\gamma}} \diff{\Delta_M}\right)
     \end{equation*}
-    For the last term to be of the same order of the others, we need to have $\Delta_M = O(M^{-\frac{\log \kappa'}{2\log 1/\gamma}})$. Since $\kappa'\gamma^2 \leq 1$, this can be achieved by taking \diff{$\Delta_M = O(M^{-1})$}.
+    For the last term to be of the same order of the others, we need to have $\Delta_M = O(M^{-\frac{\log \kappa'}{2\log 1/\gamma}})$. Since $\kappa'\gamma^2 \leq 1$, we achieve this by taking \diff{$\Delta_M = O(M^{-1})$}.
     \item if $\kappa'\gamma^2 > 1$, we take $H = \floor{\log M / \log \kappa'}$ to obtain:
     \begin{equation*}
         \expectedvalue r_n = \tilde{O}\left(M^{\frac{\log \gamma}{\log \kappa'}} + M^{\frac{\log \gamma}{\log \kappa'}}\diff{(1+M\Delta_M+\Delta_M)} + M^{\frac{\log 1/\gamma}{\log \kappa'}}\diff{\Delta_M}\right)
     \end{equation*}
     Since $\kappa'\gamma^2 > 1$, the dominant term in this sum is $M^{\frac{\log \gamma}{\log \kappa'}}M\Delta_M$. Again, taking \diff{$\Delta_M = O(M^{-1})$} yields the claimed bounds.
-    The dominant terms are 
 \end{itemize}
 Thus, the claimed bounds are obtained in both cases as long as we can impose $\Delta_M = O(M^{-1})$, that is, find a sequence $(\delta_m)_{1\leq m\leq M}$ and a function $f$ verifying:
 \begin{equation}
@@ -613,16 +613,16 @@ By choosing \diff{$\delta_m = M^{-2}$ and $f(m) = 2 \log M + 2 \log\log M$}, the
 
 We have performed some numerical experiments to evaluate and compare the following planning algorithms\footnote[1]{The source code is available at \url{https://eleurent.github.io/kl-olop/}}:
 \begin{itemize}
-    \item \texttt{Random}: returns an action at random. We use it as a baseline for minimal performance.
+    \item \texttt{Random}: returns an action at random, we use it as a minimal performance baseline.
     \item \texttt{OPD}: the \emph{Optimistic Planning for Deterministic systems} from \citep{Hren2008}, used as a baseline of optimal performance. This planner is only suited for deterministic environments, and exploits this property to obtain faster rates. However, it is expected to fail in stochastic environments.
     \item \OLOP: as described in section \ref{sec:kl-olop-olop}.\footnote[2]{Note that we use the lazy version of $\OLOP$ and $\KLOLOP$ presented in Section \ref{sec:time-complexity}, otherwise the exponential running-time would have been prohibitive.}
     \item \KLOLOP: as described in section \ref{sec:kl-olop-kl-olop}.\footnotemark[2]
     \item \texttt{KL-OLOP}(1): an aggressive version of \KLOLOP where we used $f_1(m) = \log M$ instead of $f_2(m)$. This threshold function makes the upper bounds even tighter, at the cost of an increase probability of violation. Hence, we expect this solution to be more efficient in close-to-deterministic environments. However, since we have no theoretical guarantee concerning its regret as we do with $\KLOLOP$, it might not be conservative enough and converge too early to a suboptimal sequence, especially in highly stochastic environments.
 \end{itemize}
 
-They are evaluated by solving the following tasks, using a discount factor of $\gamma=0.8$:
+They are evaluated on the following tasks, using a discount factor of $\gamma=0.8$:
 \begin{itemize}
-    \item A \href{https://github.com/eleurent/highway-env/}{highway driving} environment \citep{Leurent2018}: a vehicle is driving on a road randomly populated with other slower drivers, and must make their way as fast as possible while avoiding collisions by choosing on the the following actions: \texttt{faster}, \texttt{slower}, \texttt{change-lane-left}, \texttt{change-lane-right}, \texttt{no-op}.
+    \item A \href{https://github.com/eleurent/highway-env/}{highway driving} environment \citep{Leurent2018}: a vehicle is driving on a road randomly populated with other slower drivers, and must make their way as fast as possible while avoiding collisions by choosing on the the following actions: \texttt{change-lane-left}, \texttt{change-lane-right}, \texttt{no-op}, \texttt{faster}, \texttt{slower}.
     \item A \href{https://github.com/maximecb/gym-minigrid}{gridworld} environment \citep{gym_minigrid}: the agent navigates in a randomly-generated gridworld composed of either empty cells, terminal lava cells, and goal cells where a reward of $1$ is collected at the first visit.
     \item A stochastic version of the gridworld environment with noisy rewards, where the noise is modelled as a Bernoulli distribution with a 15\% probability of error, i.e. receiving a reward of 1 in an empty cell or 0 in a goal cell.
 \end{itemize}
@@ -649,7 +649,7 @@ They are evaluated by solving the following tasks, using a discount factor of $\
 \end{minipage}
 \end{figure}
 
-The results of our experiments are shown in Figure \ref{fig:experiments}. The \texttt{ODP} algorithm converges very quickly to the optimal return in the two first environments shown in Figure \ref{sub:highway} and Figure \ref{sub:gridworld}, because it exploits their deterministic nature: it needs neither to estimate the rewards through upper-confidence bounds nor to sample whole sequences all the way from the root when expanding a leaf, which provides a significant speedup. It can be seen of an oracle allowing to measure the conservativeness of stochastic planning algorithms. And indeed, even before introducing stochasticity, we can see that \OLOP performs quite badly on the two environments, only managing to solve them with a budget in the order of $10^{3.5}$. In stark contrast, \KLOLOP makes a much better use of its samples and reaches the same performance an order of magnitude faster. Moreover, in the stochastic gridworld environment shown in Figure \ref{sub:gridworld_stoch}, we observe that the deterministic \texttt{ODP} planner's performance saturates as it settles to suboptimal trajectories, as expected. Conversely, the stochastic planners all find better-performing open-loop policies, which justifies the need for this framework. Again, \KLOLOP converges an order of magnitude faster than \OLOP. Finally, \texttt{KL-OLOP}(1) enjoys good performance overall and displays the most satisfying trade-off between aggressiveness in deterministic environments and conservativeness in stochastic environments; hence we recommend this tuning for practical use.
+The results of our experiments are shown in Figure \ref{fig:experiments}. The \texttt{ODP} algorithm converges very quickly to the optimal return in the two first environments shown in Figure \ref{sub:highway} and Figure \ref{sub:gridworld}, because it exploits their deterministic nature: it needs neither to estimate the rewards through upper-confidence bounds nor to sample whole sequences all the way from the root when expanding a leaf, which provides a significant speedup. It can be seen of an oracle allowing to measure the conservativeness of stochastic planning algorithms. And indeed, even before introducing stochasticity, we can see that \OLOP performs quite badly on the two environments, only managing to solve them with a budget in the order of $10^{3.5}$. In stark contrast, \KLOLOP makes a much better use of its samples and reaches the same performance an order of magnitude faster. Examples of expanded trees are showcased in the Supplementary Material. Furthermore, in the stochastic gridworld environment shown in Figure \ref{sub:gridworld_stoch}, we observe that the deterministic \texttt{ODP} planner's performance saturates as it settles to suboptimal trajectories, as expected. Conversely, the stochastic planners all find better-performing open-loop policies, which justifies the need for this framework. Again, \KLOLOP converges an order of magnitude faster than \OLOP. Finally, \texttt{KL-OLOP}(1) enjoys good performance overall and displays the most satisfying trade-off between aggressiveness in deterministic environments and conservativeness in stochastic environments; hence we recommend this tuning for practical use.
 
 \section{Conclusion}
 
@@ -658,13 +658,43 @@ We introduced an enhanced version of the \OLOP algorithm for open-loop online pl
 \bibliographystyle{splncs04}
 \bibliography{references}
 %\begin{comment}
+\newpage
 \appendix
+\begin{center}
+    \Large Supplementary Material
+\end{center}
+
+\section{Examples of expanded trees}
+
+The trees expanded by different planning algorithms in the Highway environment are displayed in Figure \ref{fig:trees}. They were all generated in the same initial root state, under the same budget of $n=10^3$ calls to the generative model. We observe that the tree developed by the \OLOP algorithm is quite evenly balanced, which suggests that \OLOP behaves as uniform planning as hypothesised in \ref{sec:kl-olop-behaviour}. On the contrary, \KLOLOP is much more efficient and produced a highly unbalanced tree, with most of the sampled sequences densely concentrated around the optimal trajectory, while the other branches under the root have barely been sampled more than once. \ODP is even more efficient in this deterministic setting, as it does not need to run the trajectories from the root down to depth $L$, nor to explore twice the same transition. 
+
+\begin{figure}[pht]
+    \centering
+    \includesvg[width=0.64\textwidth]{img/OLOP}
+    \includesvg[width=0.64\textwidth]{img/KL-OLOP}
+    \includesvg[width=0.64\textwidth]{img/ODP}
+    \caption{The look-ahead trees expanded by different planning algorithms for a budget $n=10^3$, shown down to depth 6. The width of edges is proportional to the nodes visit count $T_a(M)$.}
+    \label{fig:trees}
+\end{figure}
 
 \section{Supplementary proofs of Theorem \ref{thm:regret}}
 
 \subsection{Lemma \ref{lemma:expected-regret}}
 \begin{proof}
-See proof of Lemma 4 in \citep{Bubeck2010}.
+The proof is identical to that of Lemma 4 in \citep{Bubeck2010}.
+Since $\arg \max _{a \in A} T_{a}(M)$, and $\sum_{a \in A} T_{a}(M)=M,$ we have $T_{a(n)}(M) \geq M / K$, and thus:
+\begin{equation*}
+\frac{M}{K}(V-V(a(n))) \leq(V-V(a(n))) T_{a(n)}(M) \leq \sum_{m=1}^{M} V-V\left(a^{m}\right)
+\end{equation*}
+Hence, we have, $r_{n} \leq \frac{K}{M} \sum_{m=1}^{M} V-V\left(a^{m}\right)$. Now remark that, for any sequence of actions $a\in A^L$, we have either:
+\begin{itemize}
+    \item $a_{1 : H} \in \mathcal{I}_{H} ;$ which implies $V-V(a) \leq \frac{2 \gamma^{H+1}}{1-\gamma}$
+    \item or there exists $1\leq h \leq H$ such that $a_{1:h} \in \mathcal{J}_h$; which implies $V-V(a) \leq V-V\left(a_{1 : h-1}\right)+\frac{\gamma^{h}}{1-\gamma} \leq \frac{3 \gamma^{h}}{1-\gamma}$.
+\end{itemize}
+Thus we can write:
+\begin{equation*}
+\begin{aligned} \sum_{m=1}^{M}\left(V-V\left(a^{m}\right)\right) &=\sum_{m=1}^{M}\left(V-V\left(a^{m}\right)\right)\left(\mathbbm{1}\left\{a^{m} \in \mathcal{I}_{H}\right\}+\mathbbm{1}\left\{\exists 1 \leq h \leq H : a_{1 : h}^{m} \in \mathcal{J}_{h}\right\}\right) \\ & \leq \frac{2 \gamma^{H+1}}{1-\gamma} M+3 \sum_{h=1}^{H} \sum_{a \in \mathcal{J}_{h}} \frac{\gamma^{h}}{1-\gamma} T_{a}(M) \end{aligned}
+\end{equation*}
 \qed
 \end{proof}
 
@@ -684,22 +714,63 @@ This follows from: For any $0 \leq t \leq h'$:
 \subsection{Lemma \ref{lemma:expected-P-size}}
 
 \begin{proof}
-The proof is identical to that of Lemma 9 in \citep{Bubeck2010}, where they show:
+The proof is identical to that of Lemma 9 in \citep{Bubeck2010}.
+
+\noindent
+Let $h'\geq 1$ and $0 \leq s \leq h'$. We introduce the following random variables:
+\begin{equation*}
+m_{s}^{a}=\min \left(M, \min \left\{m \geq 0 :\left|\mathcal{P}_{h, h^{\prime}}^{a}(m)\right| \geq \gamma^{2\left(s-h^{\prime}\right)}\right\}\right).
+\end{equation*}
+We will prove recursively that,
+\begin{equation}
+\label{eq:toprove}
+\left|\mathcal{P}_{h, h^{\prime}}^{\emptyset}(m)\right| \leq \sum_{t=0}^{s} \gamma^{2\left(t-h^{\prime}\right)}\left|\mathcal{I}_{t}\right|+\sum_{a \in \mathcal{I}_{s}}\left|\mathcal{P}_{h, h^{\prime}}^{a} \setminus \cup_{t=0}^{s} \mathcal{P}_{h, h^{\prime}}^{a_{1:t}}\left(m_{t}^{a_{1:t}}\right)\right|
+\end{equation}
+The result is true for $s = 0$ since $\mathcal{I}_0 = \{\emptyset\}$ and by definition of $m^\emptyset_0$,
+\begin{equation*}
+\left|\mathcal{P}_{h, h^{\prime}}^{\emptyset}(m)\right| \leq \gamma^{-2 h^{\prime}}+\left|\mathcal{P}_{h, h^{\prime}}^{\emptyset}(m) \setminus \mathcal{P}_{h, h^{\prime}}^{\emptyset}\left(m_{0}^{\emptyset}\right)\right|
+\end{equation*}
+Now let us assume that the result is true for $s<h'$. We have:
+\begin{align*}
+\sum_{a \in \mathcal{I}_{s}}\left|\mathcal{P}_{h, h^{\prime}}^{a}(m) \setminus \cup_{h, h^{\prime}}^{a_{1 : t}}\left(m_{t}^{a_{1 : t}}\right)\right|&=\sum_{a \in \mathcal{I}_{s+1}}\left|\mathcal{P}_{h, h^{\prime}}^{a}(m) \setminus \cup_{t=0}^{s} \mathcal{P}_{h, h^{\prime}}^{a_{1 : t}}\left(m_{t}^{a_{1 : t}}\right)\right|\\
+&\leq \sum_{a \in \mathcal{I}_{s+1}} \gamma^{2\left(s+1-h^{\prime}\right)}+\left|\mathcal{P}_{h, h^{\prime}}^{a}(m) \setminus \cup_{t=0}^{s+1} \mathcal{P}_{h, h^{\prime}}^{a_{1 : t}}\left(m_{t}^{a_{1 : t}}\right)\right|\\
+&= \gamma^{2\left(s+1-h^{\prime}\right)}\left|\mathcal{I}_{s+1}\right|+\sum_{a \in \mathcal{I}_{s+1}}\left|\mathcal{P}_{h, h^{\prime}}^{a}(m) \setminus \cup_{t=0}^{s+1} \mathcal{P}_{h, h^{\prime}}^{a_{1 ; t}}\left(m_{t}^{a_{1 : t}}\right)\right|
+\end{align*}
+which ends the proof of \eqref{eq:toprove}. Thus we proved (by taking $s=h'$ and $m=M$):
+\begin{equation*}
+\begin{aligned}\left|\mathcal{P}_{h, h^{\prime}}^{\emptyset}(M)\right| & \leq \sum_{t=0}^{h^{\prime}} \gamma^{2\left(t-h^{\prime}\right)}\left|\mathcal{I}_{t}\right|+\sum_{a \in \mathcal{I}_{h^{\prime}}}\left|\mathcal{P}_{h, h^{\prime}}^{a}(M) \setminus \cup_{t=0}^{s+1} \mathcal{P}_{h, h^{\prime}}^{a_{1 : t}}\left(m_{t}^{a_{1 : t}}\right)\right.\\ &=\sum_{t=0}^{h^{\prime}} \gamma^{2\left(t-h^{\prime}\right)}\left|\mathcal{I}_{t}\right|+\sum_{a \in \mathcal{J}_{h}}\left|\mathcal{P}_{h, h^{\prime}}^{a}(M) \setminus \cup_{h, h^{\prime}}^{a_{1 : t}}\left(m_{t}^{a_{1 : t}}\right)\right| \end{aligned}
+\end{equation*}
+
+Now, for any $a\in \mathcal{J}_h$, let $\tilde{m} = \max_{0\leq t\leq h'} m_t^{a_{1:t}}$. Note that for $m\geq \tilde{m}$, equation \eqref{eq:P-min-size} is not satisfied. Thus we have
+\begin{equation*}
+\begin{aligned}
+\left|\mathcal{P}_{h, h^{\prime}}^{a} \setminus \cup_{h, h^{\prime}}^{s+1} \mathcal{P}_{h, h^{\prime}}^{a_{1 : t}}\left(m_{t}^{a_{1 : t}}\right)\right|=&\sum_{m=\tilde{m}}^{M-1} \tau_{h, h^{\prime}}^{a}(m+1)=\sum_{m=0}^{M-1} \tau_{h, h^{\prime}}^{a}(m+1) \mathbbm{1}\{\eqref{eq:P-min-size} \text { is not satisfied }\} \\ & \leq \sum_{m=0}^{M-1} \tau_{h, h^{\prime}}^{a}(m+1) \mathbbm{1}\{\eqref{eq:cond-ukl} \text { or }\eqref{eq:cond-lkl}\} \end{aligned}
+\end{equation*}
+where the last inequality results from Lemma \ref{lemma:size_Ph}. Hence, we proved:
 
 \begin{equation*}
-    |\mathcal{P}^\emptyset_{h,h'}(M)| \leq \mathbbm{1}_{h'>0}\sum_{t=0}^{h'}(\gamma^{2(t-h')}|\mathcal{I}_t| + \sum_{m=1}^{M}\sum_{a\in \mathcal{J}_h} \mathbbm{1}\{\eqref{eq:cond-ukl}\text{ or }\eqref{eq:cond-lkl}\}
+\left|\mathcal{P}_{h, h^{\prime}}^{\emptyset}\right| \leq \sum_{t=0}^{h^{\prime}} \gamma^{2\left(t-h^{\prime}\right)}\left|\mathcal{I}_{t}\right|+\sum_{m=0}^{M-1} \sum_{a \in \mathcal{J}_{h}} \mathbbm{1}\{\eqref{eq:cond-ukl}\text{ or }\eqref{eq:cond-lkl}\}
 \end{equation*}
-Taking the expectation and applying Lemma \ref{lemma:boundary-crossing-prob} yield the claimed bound.
+
+Taking the expectation and applying Lemma \ref{lemma:boundary-crossing-prob} yield the claimed bound for $h'\geq 1$.
+
+Now for $h' = 0$ we need a modified version of Lemma \ref{lemma:size_Ph}. Indeed in this case one can directly prove that $\tau_{h,0}^a(m+1)=1$ implies that either equation \eqref{eq:cond-ukl} or \eqref{eq:cond-lkl} is satisfied (this follows from the fact that $\tau_{h,0}^a(m+1)=1$ always imply that \eqref{eq:sampled-enough-h} is true for $h'= 0$). Thus we obtain:
+\begin{equation*}
+\left|\mathcal{P}_{h, h^{\prime}}^{\emptyset}\right|=\sum_{m=0}^{M-1} \sum_{a \in \mathcal{J}_{h}} \tau_{h, 0}^{a}(m+1) \leq \sum_{m=0}^{M-1} \sum_{a \in \mathcal{J}_{h}} \mathbbm{1}\{\eqref{eq:cond-ukl}\text{ or }\eqref{eq:cond-lkl}\}
+\end{equation*}
+Taking the expectation and applying Lemma \ref{lemma:boundary-crossing-prob} yield the claimed bound for $h' = 0$ and ends the proof.
 \qed
 \end{proof}
 
 \subsection{Lemma \ref{lemma:expected-plays-count}}
 
 \begin{proof}
-The proof is identical to that of Lemma 10 in \citep{Bubeck2010}, where they show:
-\begin{equation*}
-    \sum_{a\in \mathcal{J}_h} T_a(M) = \tilde{O}\left((\kappa')^h + \gamma^{-2h}\sum_{h'=1}^{h-1} \gamma^{2h'}|\mathcal{P}^\emptyset_{h,h'}(M)| + M|\mathcal{P}^\emptyset_{h,0}(M)|\right)
-\end{equation*}
+The proof is identical to that of Lemma 10 in \citep{Bubeck2010}:
+\begin{align*}
+\sum_{a \in \mathcal{J}_{h}} T_{a}(M) &= \sum_{a \in \mathcal{J}_{h} \backslash \mathcal{P}_{h, h-1}^{\emptyset}} T_{a}(M)+\sum_{h^{\prime}=1}^{h-1} \sum_{a \in \mathcal{P}_{h, h^{\prime}}^{\emptyset} \setminus \mathcal{P}_{h, h^{\prime}-1}^{\emptyset}} T_{a}(M)+\sum_{a \in \mathcal{P}_{h, 0}^{\emptyset}} T_{a}(M)\\
+&\leq 2f(m)(h+1)^{2} \gamma^{2(h-2-h)}\left|\mathcal{J}_{h}\right|+\sum_{h^{\prime}=1}^{h-1} 2f(m)(h+1)^{2} \gamma^{2\left(h^{\prime}-2-h\right)} \log M\left|\mathcal{P}_{h, h^{\prime}}^{\emptyset}\right|+M\left|\mathcal{P}_{h, 0}^{\emptyset}\right|\\
+&=\tilde{O}\left(\left(\kappa^{\prime}\right)^{h}+\gamma^{-2 h} \sum_{h^{\prime}=1}^{h-1} \gamma^{2 h^{\prime}}\left|\mathcal{P}_{h, h^{\prime}}^{\emptyset}\right|+M\left|\mathcal{P}_{h, 0}^{\emptyset}\right|\right)
+\end{align*}
 Taking the expectation and applying the bound of Lemma \ref{lemma:expected-P-size} give the claimed bound.
 \qed
 \end{proof}
