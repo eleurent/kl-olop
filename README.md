@@ -4,11 +4,14 @@ We consider the problem of online planning in a Markov Decision Process when giv
 
 ## Experiments
 
-### Expected return _w.r.t._ budget `n`
+### Performances _w.r.t._ budget `n`
 
-![](paper/img/hw_return.svg)
-![](paper/img/gw_return.svg)
-![](paper/img/gw_stoch_return.svg)
+| Environment           | Expected return                    |
+| :-------------------: | :-----------------------------:    |
+| Highway               | ![](paper/img/hw_return.svg)       |
+| Gridworld             | ![](paper/img/gw_return.svg)       |
+| Stochastic Gridworld  | ![](paper/img/gw_stoch_return.svg) |
+
 
 ### Expanded trees
 
