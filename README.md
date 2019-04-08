@@ -4,20 +4,33 @@ We consider the problem of online planning in a Markov Decision Process when giv
 
 ## Experiments
 
-### Performances _w.r.t._ budget `n`
+We compare several planning algorithms:
+* **`OPD`** [Optimistic Planning for Deterministic Systems](https://hal.inria.fr/hal-00830182), Hren J., Munos R. (2008).
+* **`OLOP`** [Open Loop Optimistic Planning](http://sbubeck.com/COLT10_BM.pdf), Bubeck S., Munos R. (2010).
+* **`KL-OLOP`** An extension of `OLOP` with Kullback-Leibler upper confidence bounds.
+
+### Expanded trees
+
+We compare the trees expanded in the same root space of [highway-env](https://github.com/eleurent/highway-env) by the three algorithms, all provided with equal budget of `n = 1e3` calls to a generative model.
+
+| |
+|:--:|
+| ![](paper/img/ODP.svg) | 
+| `OPD` is tailored for deterministic systems and exploits this structure to explore a sparse near-optimal subtree. |
+| ![](paper/img/OLOP.svg) |
+| `OLOP` behaves in the same way as uniform planning, and fails to identify the optimal trajectory. |
+| ![](paper/img/KL-OLOP.svg) |
+| `KL-OLOP` explores a tree similar to that of `OPD` despite supporting the larger class of stochastic systems, and successfully returns the optimal trajectory. |
+
+### Performances
+
+We evaluate the expected return obtained by these algorithms with respect to their numerical budgt `n` in three different enviroments.
 
 | Environment           | Expected return                    |
 | :-------------------: | :-----------------------------:    |
 | Highway               | ![](paper/img/hw_return.svg)       |
 | Gridworld             | ![](paper/img/gw_return.svg)       |
 | Stochastic Gridworld  | ![](paper/img/gw_stoch_return.svg) |
-
-
-### Expanded trees
-
-![](paper/img/OLOP.svg)
-![](paper/img/KL-OLOP.svg)
-![](paper/img/ODP.svg)
 
 ## Reproduce the Experiments
 
