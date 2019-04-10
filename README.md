@@ -64,3 +64,56 @@ Options:
   --chunksize <c>             Size of data chunks each processor receives
   --range <start:end>         Range of budgets to be plotted.
 ```
+
+### Run a single agent
+
+To visualize a single agent interacting with an environment, run:
+```shell
+cd <path-to-rl-agents>/scripts/
+python experiments.py evaluate <path/to/env.json> <path/to/agent.json> --test --episodes=1
+```
+The following agent configurations can be used:
+
+#### odp.json
+
+```
+{
+    "__class__": "<class 'rl_agents.agents.tree_search.deterministic.DeterministicPlannerAgent'>",
+    "gamma": 0.8,
+    "budget": 500
+}
+```
+
+#### olop.json
+
+```
+{
+    "__class__": "<class 'rl_agents.agents.tree_search.olop.OLOPAgent'>",
+    "gamma": 0.8,
+    "budget": 500,
+    "upper_bound": {
+        "type": "hoeffding",
+        "c": 4
+    },
+    "lazy_tree_construction": true,
+    "continuation_type": "uniform"
+}
+```
+
+#### kl-olop.json
+
+```
+{
+    "__class__": "<class 'rl_agents.agents.tree_search.olop.OLOPAgent'>",
+    "gamma": 0.8,
+    "budget": 500,
+    "upper_bound": {
+        "type": "kullback-leibler",
+        "c": 2
+    },
+    "lazy_tree_construction": true,
+    "continuation_type": "uniform"
+}
+```
+
+Note that the line `"env_preprocessors": [{"method":"simplify"}]` should be added to decrease computation time in the `highway-env` environment.
