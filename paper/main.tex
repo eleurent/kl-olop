@@ -18,12 +18,13 @@
 % Custom packages
 \usepackage{graphicx}
 %\usepackage{natbib}
+\usepackage[cmex10]{amsmath}
+\usepackage{amssymb}
 \usepackage{hyperref}
 \usepackage{cleveref}
 \usepackage[usenames,dvipsnames]{xcolor}
 \usepackage{float}
-\usepackage{amsmath}
-\usepackage{amssymb}
+
 \usepackage{calc}
 \usepackage{bbm}
 \usepackage{mathtools}
@@ -32,8 +33,8 @@
 \usepackage[linesnumbered,ruled,vlined]{algorithm2e}
 \usepackage{todonotes}
 \usepackage{svg}
-\usepackage[lofdepth,lotdepth]{subfig}
-\usepackage{comment}
+\usepackage{subfig}
+%\usepackage{comment}
 
 \input{mathdef.tex}
 
@@ -261,7 +262,7 @@ This divergence and the corresponding bounds are illustrated in Figure \ref{fig:
 
 \begin{figure}[tp]
     \centering
-    \includegraphics[width=0.6\textwidth]{img/ukl.eps}
+    \includegraphics[width=0.6\textwidth]{img/ukl-eps-converted-to}
     \caption{The Bernoulli Kullback-Leibler divergence $\dber$, and the corresponding upper and lower confidence bounds $U^{\mu}_a$ and $L^{\mu}_a$ for the empirical average $\hat{\mu_a}$. Lower values of $f(m)$ give tighter confidence bounds that hold with lower probabilities.}
     \label{fig:ukl}
 \end{figure}
@@ -285,7 +286,7 @@ Let us denote the proportion of near-optimal nodes $\kappa_2$ as:
 
 \begin{equation*}
     \label{eq:kappa}
-    \kappa_2 = \limsup_{h\rightarrow\infty}{\left|\left\{a\in a^H:V(a) \geq V - 2\frac{\gamma^{h+1}}{1-\gamma}\right\}\right|^{1/h}}
+    \kappa_2 \eqdef \limsup_{h\rightarrow\infty}{\left|\left\{a\in a^H:V(a) \geq V - 2\frac{\gamma^{h+1}}{1-\gamma}\right\}\right|^{1/h}}
 \end{equation*}
 
 \begin{theorem}[Sample complexity]
@@ -318,7 +319,7 @@ We propose in Algorithm \ref{algo:lazy-kl-olop} a lazy version of \KLOLOP which 
 
 \begin{figure}[ht]
     \centering
-    \includesvg[width=0.6\textwidth]{img/tree}
+    \includegraphics[width=0.6\textwidth]{img/tree_svg-tex}
     \caption{A representation of the tree $\Tau_m^+$, with $K = 2$ actions and after episode $m = 2$, when two sequences have been sampled. They are represented with solid lines and dots \textbullet, and they constitute the explored subtree $\Tau_m$. When extending $\Tau_m$ with the missing children of each node, represented with dashed lines and diamonds $\diamond$, we obtain the full extended subtree $\Tau_m^+$. The set of its leaves is denoted $\LL_m^+$ and shown as a dotted set.}
     \label{fig:tree}
 \end{figure}
@@ -629,34 +630,112 @@ They are evaluated on the following tasks, using a discount factor of $\gamma=0.
 
 \begin{figure}[htp]
 \centering
-\begin{minipage}{\textwidth}
-    \subfloat[Highway]{
-      \includesvg[width=\textwidth]{img/hw_return.svg}
-      \label{sub:highway}
-    }
-    \newline
-    \subfloat[Gridworld]{
-      \includesvg[width=0.5\textwidth]{img/gw_return.svg}
-      \label{sub:gridworld}
-    }
-    \subfloat[Stochastic gridworld]{
-      \includesvg[width=0.5\textwidth]{img/gw_stoch_return.svg}
-      \label{sub:gridworld_stoch}
-    }
-    
+%\begin{minipage}{\textwidth}
+%      \includegraphics[width=\textwidth]{img/hw_return_svg-tex}
+%      \label{sub:highway}
+%      \includegraphics[width=0.5\textwidth]{img/gw_return_svg-tex}
+%      \label{sub:gridworld}
+%      \includegraphics[width=0.5\textwidth]{img/gw_stoch_return_svg-tex}
+%      \label{sub:gridworld_stoch}
+
+\subfloat{
+	\includegraphics[width=\textwidth]{img/hw_return_svg-tex}
+	\label{sub:highway}
+}
+\newline
+\subfloat{
+	\includegraphics[width=0.5\textwidth]{img/gw_return_svg-tex}
+	\label{sub:gridworld}
+}
+\subfloat{
+	\includegraphics[width=0.5\textwidth]{img/gw_stoch_return_svf-tex}
+	\label{sub:gridworld_stoch}
+}
     \caption{Numerical experiments: for each environment-agent configuration, we compute the average return over 100 runs –- along with its 95\% confidence interval –- with respect to the available budget $n$.}
     \label{fig:experiments}
-\end{minipage}
+%\end{minipage}
 \end{figure}
 
-The results of our experiments are shown in Figure \ref{fig:experiments}. The \texttt{ODP} algorithm converges very quickly to the optimal return in the two first environments shown in Figure \ref{sub:highway} and Figure \ref{sub:gridworld}, because it exploits their deterministic nature: it needs neither to estimate the rewards through upper-confidence bounds nor to sample whole sequences all the way from the root when expanding a leaf, which provides a significant speedup. It can be seen of an oracle allowing to measure the conservativeness of stochastic planning algorithms. And indeed, even before introducing stochasticity, we can see that \OLOP performs quite badly on the two environments, only managing to solve them with a budget in the order of $10^{3.5}$. In stark contrast, \KLOLOP makes a much better use of its samples and reaches the same performance an order of magnitude faster. Examples of expanded trees are showcased in the Supplementary Material. Furthermore, in the stochastic gridworld environment shown in Figure \ref{sub:gridworld_stoch}, we observe that the deterministic \texttt{ODP} planner's performance saturates as it settles to suboptimal trajectories, as expected. Conversely, the stochastic planners all find better-performing open-loop policies, which justifies the need for this framework. Again, \KLOLOP converges an order of magnitude faster than \OLOP. Finally, \texttt{KL-OLOP}(1) enjoys good performance overall and displays the most satisfying trade-off between aggressiveness in deterministic environments and conservativeness in stochastic environments; hence we recommend this tuning for practical use.
+The results of our experiments are shown in Figure \ref{fig:experiments}. The \texttt{ODP} algorithm converges very quickly to the optimal return in the two first environments, shown in Figure \ref{sub:highway} and Figure \ref{sub:gridworld}, because it exploits their deterministic nature: it needs neither to estimate the rewards through upper-confidence bounds nor to sample whole sequences all the way from the root when expanding a leaf, which provides a significant speedup. It can be seen of an oracle allowing to measure the conservativeness of stochastic planning algorithms. And indeed, even before introducing stochasticity, we can see that \OLOP performs quite badly on the two environments, only managing to solve them with a budget in the order of $10^{3.5}$. In stark contrast, \KLOLOP makes a much better use of its samples and reaches the same performance an order of magnitude faster. Examples of expanded trees are showcased in the Supplementary Material. Furthermore, in the stochastic gridworld environment shown in Figure \ref{sub:gridworld_stoch}, we observe that the deterministic \texttt{ODP} planner's performance saturates as it settles to suboptimal trajectories, as expected. Conversely, the stochastic planners all find better-performing open-loop policies, which justifies the need for this framework. Again, \KLOLOP converges an order of magnitude faster than \OLOP. Finally, \texttt{KL-OLOP}(1) enjoys good performance overall and displays the most satisfying trade-off between aggressiveness in deterministic environments and conservativeness in stochastic environments; hence we recommend this tuning for practical use.
 
 \section{Conclusion}
 
 We introduced an enhanced version of the \OLOP algorithm for open-loop online planning, whose design was motivated by an investigation of the over-conservative search behaviours of \OLOP. We analysed its sample complexity and showed that the original regret bounds are preserved, while its empirical performances are increased by an order of magnitude in several numerical experiments. Finally, we proposed an efficient implementation that benefits from a substantial speedup, facilitating its use for real-time planning applications.
 
 \bibliographystyle{splncs04}
-\bibliography{references}
+\begin{thebibliography}{10}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+\providecommand{\doi}[1]{https://doi.org/#1}
+
+\bibitem{Bellman1957}
+Bellman, R.: {Dynamic Programming}. Princeton University Press  (1957)
+
+\bibitem{Bubeck2010}
+Bubeck, S., Munos, R.: {Open Loop Optimistic Planning}. In: Proc. of COLT
+  (2010)
+
+\bibitem{Busoniu2013}
+Buşoniu, L., Daniels, A., Munos, R., Babuska, R.: {Optimistic planning for
+  continuous-action deterministic systems}. IEEE Symposium on Adaptive Dynamic
+  Programming and Reinforcement Learning, ADPRL  (2013)
+
+\bibitem{Busoniu2018}
+Buşoniu, L., P{\'{a}}ll, E., Munos, R.: {Continuous-action planning for
+  discounted infinite-horizon nonlinear optimal control with Lipschitz values}.
+  Automatica  \textbf{92}(December),  100--108 (2018)
+
+\bibitem{Cappe2013}
+Capp{\'{e}}, O., Garivier, A., Maillard, O.A., Munos, R., Stoltz, G.:
+  {Kullback-Leibler Upper Confidence Bounds for Optimal Sequential Allocation}.
+  The Annals of Statistics  \textbf{41}(3),  1516--1541 (2013)
+
+\bibitem{gym_minigrid}
+Chevalier-Boisvert, M., Willems, L., Pal, S.: Minimalistic gridworld
+  environment for openai gym. \url{https://github.com/maximecb/gym-minigrid}
+  (2018)
+
+\bibitem{Coquelin2007}
+Coquelin, P.A., Munos, R.: {Bandit Algorithms for Tree Search}. Proc. of UAI
+  (2007)
+
+\bibitem{Coulom2006}
+Coulom, R.: {Efficient Selectivity and Backup Operators in Monte-Carlo Tree
+  Search}. In: {Proc. of International Conference on Computer and Games} (2006)
+
+\bibitem{Grill2016}
+Grill, J.B., Valko, M., Munos, R.: {Blazing the trails before beating the path:
+  Sample-efficient Monte-Carlo planning}. In: Proc. of NeurIPS (2016)
+
+\bibitem{Hren2008}
+Hren, J.F., Munos, R.: {Optimistic planning of deterministic systems}. Lecture
+  Notes in Computer Science  (2008)
+
+\bibitem{Kearns2002}
+Kearns, M., Mansour, Y., Ng, A.Y.: {A sparse sampling algorithm for
+  near-optimal planning in large Markov decision processes}. In: Proc. of IJCAI
+  (2002)
+
+\bibitem{Kocsis2006}
+Kocsis, L., Szepesv\'{a}ri, C.: Bandit based monte-carlo planning. In: Proc. of
+  ECML (2006)
+
+\bibitem{Leurent2018}
+Leurent, E., Blanco, Y., Efimov, D., Maillard, O.A.: {Approximate Robust
+  Control of Uncertain Dynamical Systems}. NeurIPS Machine Learning for
+  Intelligent Transportation Systems Workshop  (2018)
+
+\bibitem{Munos2014}
+Munos, R.: {From Bandits to Monte-Carlo Tree Search: The Optimistic Principle
+  Applied to Optimization and Planning}. Foundations and
+  Trends{\textregistered} in Machine Learning  (2014)
+
+\bibitem{Szorenyi2014}
+Szorenyi, B., Kedenburg, G., Munos, R.: {Optimistic planning in Markov decision
+  processes using a generative model}. In: Proc. of NeurIPS (2014)
+
+\end{thebibliography}
+
 %\begin{comment}
 \newpage
 \appendix
@@ -666,14 +745,14 @@ We introduced an enhanced version of the \OLOP algorithm for open-loop online pl
 
 \section{Examples of expanded trees}
 
-The trees expanded by different planning algorithms in the Highway environment are displayed in Figure \ref{fig:trees}. They were all generated in the same initial root state, under the same budget of $n=10^3$ calls to the generative model. We observe that the tree developed by the \OLOP algorithm is quite evenly balanced, which suggests that \OLOP behaves as uniform planning as hypothesised in \ref{sec:kl-olop-behaviour}. On the contrary, \KLOLOP is much more efficient and produced a highly unbalanced tree, with most of the sampled sequences densely concentrated around the optimal trajectory, while the other branches under the root have barely been sampled more than once. \ODP is even more efficient in this deterministic setting, as it does not need to run the trajectories from the root down to depth $L$, nor to explore twice the same transition. 
+The trees expanded by different planning algorithms in the Highway environment are displayed in Figure \ref{fig:trees}. They were all generated in the same initial root state, under the same budget of $n=10^3$ calls to the generative model. We observe that \ODP exploits the deterministic setting efficiently and produces a very sparse tree densely concentrated around the optimal trajectory. Conversely, the tree developed by the \OLOP algorithm is quite evenly balanced, which suggests that \OLOP behaves as uniform planning as hypothesised in \ref{sec:kl-olop-behaviour}. In stark contrast, \KLOLOP is much more efficient and produced a highly unbalanced tree, exploring the same regions of the tree as \ODP. 
 
 \begin{figure}[pht]
     \centering
 
-    \includesvg[width=0.64\textwidth]{img/ODP}
-    \includesvg[width=0.64\textwidth]{img/OLOP}
-    \includesvg[width=0.64\textwidth]{img/KL-OLOP}
+    \includegraphics[width=0.64\textwidth]{img/ODP_svg-tex}    \includegraphics[width=0.64\textwidth]{img/OLOP_svg-tex}
+    \includegraphics[width=0.64\textwidth]{img/KL-OLOP_svg-tex}
+
     \caption{The look-ahead trees expanded by different planning algorithms for a budget $n=10^3$, shown down to depth 6. The width of edges is proportional to the nodes visit count $T_a(M)$.}
     \label{fig:trees}
 \end{figure}
