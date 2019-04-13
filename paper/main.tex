@@ -1,11 +1,11 @@
-\let\origvec\vec
+\let\accentvec\vec            %add before \documentclass
 \documentclass[runningheads]{llncs}
-\let\springervec\vec
-\let\vec\origvec
-
+\let\spvec\vec                %add before \usepackage{amsmath}
+\let\vec\accentvec
 
 \usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{lmodern}
 \usepackage{url}            % simple URL typesetting
 \usepackage{booktabs}       % professional-quality tables
 \usepackage{amsfonts}       % blackboard math symbols
