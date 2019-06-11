@@ -63,11 +63,21 @@
 \usepackage{eqparbox}
 \usepackage{xcolor}
 \usepackage[backend=biber, citestyle=authoryear, maxcitenames=2, maxbibnames=2]{biblatex}
+\usepackage{lipsum}
+\usepackage{svg}
 
 \bibliography{../references.bib}
 
 \input{style}
 \input{../mathdef}
+
+% Removed from mathdef because of conflict with paper lcns class
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}{Definition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{remark}{Remark}
+\newtheorem{property}{Property}
 
 \begin{document}
 
@@ -106,10 +116,10 @@ eyecatcher=true
 \includegraphics[width=14em]{./img/renault_group}
 }
 {
-Approximate Robust Control of Uncertain\\Dynamical Systems
+Practical Open-Loop Optimistic Planning
 }
 {
-Edouard Leurent, Yann Blanco, Denis Efimov, Odalric-Ambrym Maillard
+Edouard Leurent, Odalric-Ambrym Maillard
 \vspace{-3\baselineskip}
 }
 {
@@ -123,272 +133,193 @@ Edouard Leurent, Yann Blanco, Denis Efimov, Odalric-Ambrym Maillard
 %----------------------------------------------------------------------------------------
 
 \headerbox{\textsc{Motivation}}{name=motivation,span=1,column=0,row=0}{
-\begin{center}
-%\includegraphics[width=\textwidth]{../img/pipeline}    
-\textbf{Decision-making} pipeline in Autonomous Driving
-\end{center}
 
-\textbf{Progress has been made} {\small \parencite{Paden2016}}
-\begin{itemize}[nolistsep]
-\item[$\eqgcolb{\blacktriangleright}$] \hlg{route planning} is solved
-\item[$\eqbcolb{\blacktriangleright}$] reliable techniques exist for \hlb{motion planning} and \hlb{control}
+We consider the optimal control of an MDP $\cM = (\cS, \cA, R, T, \gamma)$ with bounded rewards $R$
+\begin{itemize}
+    \item $R$ and $T$ are \hlr{unknown}
+    \item Access to a \hlb{generative model} $s' \sim \probability{s'|s,a}$ and $r\sim\probability{r|s, a}$
+    \item \hlr{Fixed-budget} setting: the generative model can be queried $n$ times
 \end{itemize}
-
-\vspace{.5\baselineskip}
-\textbf{Current limitations}
-\begin{itemize}[nolistsep,leftmargin=0.55cm]
-\item[$\eqrcolb{\blacktriangleright}$] Implementations rely on \hlr{hand-crafted rules} such as FSM
-\item[] \incarrow tailored for \hlr{specific} cases, won't \hlr{scale} to complex scenes
-\item[$\eqrcolb{\blacktriangleright}$] Social interactions are difficult to model explicitly:
-\item[] \incarrow poor \hlr{negotiation} abilities, \hlr{"freezing robot"} problem
-\end{itemize}
-
-\vspace{.5\baselineskip}
-\textbf{We frame the problem in a sequential learning setting}
 }
 
 %----------------------------------------------------------------------------------------
 %	Setting
 %----------------------------------------------------------------------------------------
-\headerbox{\textsc{Reinforcement learning}}{name=setting,span=1,column=0,row=0,below=motivation}{
+\headerbox{\textsc{Open-Loop Optimistic Planning}}{name=setting,span=1,column=0,row=0,below=motivation}{
+\OLOP algorithm introduced in [\cite{Bubeck2010}].
 
-    \hlb{\textbf{Optimal}} control under \hlr{unknown} dynamics $T(s_{t+1} | s_t, a_t)$
-
-    \begin{equation}
-        \max_\pi \expectedvalue \underbrace{\left[\sum_{t=0}^\infty \gamma^t r(s_t, a_t) \condbar \hleg{a_t\sim\pi(s_t)}, \hler{s_{t+1}\sim T(s_t, a_t)}\right]}_{\text{policy return }R^T_\pi}
-    \end{equation}
+Split the budget $n$ into $M$ sequences of length $L$.
+%Let $M$ be the largest integer such that $M \log M/(2 \log 1/\gamma) \leq n$\;
+%Let $L = \log M / (2 \log 1/\gamma)$\;
     
-    \textbf{Model-free} methods directly optimize $\hleg{\pi(a_t | s_t)}$ through policy evaluation and policy improvement.
-    \vspace{1em}
-
-    \textbf{Model-based} methods
-    \begin{enumerate}[itemsep=0pt]
-        \item Learn a model for the dynamics $\hler{\hat{T}(s_t, a_t)}$
-        \item (Planning) Leverage it to compute
-        \begin{equation*}
-        \max_\pi \expectedvalue \left[\sum_{t=0}^\infty \gamma^t r(s_t, a_t) \condbar \hleg{a_t\sim\pi(s_t)}, \hler{s_{t+1}\sim \hat{T}(s_t, a_t)}\right]
-        \end{equation*}
-    \end{enumerate}
+\includesvg[width=\textwidth]{img/olop-explain.svg}
+\includesvg[width=\textwidth]{img/olop-explain-2.svg}
 
 
-    \begin{itemize}[nolistsep]
-        \item[$\eqgcolb{\blacktriangleright}$] Better \hlg{sample efficiency}, \hlg{interpretability}
-        \item[$\eqrcolb{\blacktriangleright}$] $\hler{\text{Model bias: }\hat{T} \neq T}$
-    \end{itemize}
+\begin{center}
+\begin{algorithm}[H]
+\DontPrintSemicolon
+\footnotesize
+\For{each episode $m = 1, \cdots, M$}{
+Compute $U_a(m-1)$ from \eqref{eq:Ua} for all $a\in\mathcal{T}$\;
+Compute $B_a(m-1)$ from \eqref{eq:Ba} for all $a\in A^L$\;\label{alg:b_values_compute}
+Sample a sequence with highest B-value: $a^m \in \argmax_{a\in A^L} B_a(m-1)$.\;
+}
+\Return the most played sequence $a(n) \in \argmax_{a\in A^L} T_a(M)$
+\caption{General structure for Open-Loop Optimistic Planning}
+\label{algo:kl-olop}
+\end{algorithm}
+\end{center}
 
 }
 
 %----------------------------------------------------------------------------------------
 % Tools
 %----------------------------------------------------------------------------------------
-\headerbox{\textsc{Robust optimization}}
-%{name=tools,column=2,span =2}
+\headerbox{\textsc{What's wrong with OLOP?}}
 {name=tools,column=0,below=setting,span =1}
 {
-\begin{enumerate}[nolistsep]
-    \item Build a \textbf{confidence region} $\bT$ around $\hler{T}$
-    \begin{equation*}
-    \forall T'\in \bT, \quad \probability(||\hler{T} - T'|| > \epsilon) < \delta
-    \end{equation*}
-    \item Plan \textbf{robustly} with respect to this ambiguity
-    \begin{equation}
-        \hleg{\max_{\pi}}\ \underbrace{\hler{\min_{T\in \bT}} \expectedvalue \sum_{t=0}^\infty \gamma^t r_t}_{v^r(\pi)} 
+
+Overly pessimistic, especially in the low-budget regime.
+
+\begin{equation}
+         U^{\mu}_a(m) = \hat{\mu}_a(m) + \sqrt{\frac{2 \log M}{T_a(m)}}
     \end{equation}
-\end{enumerate}
+    \begin{equation}
+    \label{eq:Ua}
+        U_a(m) \eqdef \sum_{t = 1}^h \gamma^t U^{\mu}_{a_{1:t}}(m) + \frac{\gamma^{h+1}}{1-\gamma}
+    \end{equation}
+    \begin{equation}
+    \label{eq:Ba}
+        B_a(m) \eqdef \inf_{1 \leq t \leq L} U_{a_{1:t}}(m)
+    \end{equation}
+    Intuitive explanation: 
+    \begin{itemize}
+        \item Unintended behaviour happens when $\hler{U^{\mu}_a(m) > 1}, \forall a$. 
+        \item Then the sequence $(U_{a_{1:t}}(m))_t$ is non-decreasing
+        \item Then \hlr{$B_a(m) = U_{a_{1:1}}(m)$}
+    \end{itemize}
 
-\textbf{One-step} game between the planner and the environment:
-\begin{itemize}[nolistsep]
-    \item[1.] the \hlg{learner} reveals its policy $\hleg{\pi}$
-    \item[2.] the \hlr{adversary} chooses the worst-case dynamics $T$
-\end{itemize}
+\includesvg[width=\textwidth]{img/olop-explain-3.svg}
 
 \begin{center}
-    \hlb{\textbf{Assumption}}
+\texttt{OLOP} behaves as \hlr{uniform planning}!    
 \end{center}
-We consider deterministic systems: $s_{t+1} = T(s_t, a_t)$
-
-\begin{center}
-\hlr{\textbf{Challenge}} 
-\end{center}
-How to optimize this objective?
-\begin{itemize}[nolistsep]
-    \item \hlg{Linear} system: $\mathcal{H}_\infty$ control, robust LQ
-    \item \hlg{Finite} state-space: Robust Dynamic Programming
-    \item \hlr{Non-linear continuous} system: ?
-\end{itemize}
-
 }
 
 
 %----------------------------------------------------------------------------------------
-%	Discrete Ambiguity
+%	KL-OLOP
 %----------------------------------------------------------------------------------------
-\headerbox{\textsc{Discrete ambiguity and tree-based planning}}{name=discrete,column=1,span=2}{
-\vspace{-.25\baselineskip}
+\headerbox{\textsc{Kullback-Leibler OLOP}}{name=klolop,column=1,span=2}{
 
-\begin{center}
-    \hlb{\textbf{Assumption}}
-\end{center}
-The ambiguity set $\bT$ and the action space $\mathcal{A}$ are discrete and \textbf{finite}: $
- \hleb{\bT = \{T_m\}_{m\in[1, M]}} \quad \text{and} \quad \mathcal{A} = \{a_k\}_{k\in[1, K]}$
- 
- We propose a robust version of \textbf{optimistic planning} for deterministic systems {\small \parencite{Hren2008}}
-
-
-\begin{tabular}{>{\centering}p{0.63\textwidth}>{\centering}p{0.32\textwidth}}
-\begin{minipage}[]{0.63\textwidth}
-\bookboxx{
-\begin{definition}
-Given node $i\in\mathcal{T}$, define
-
-\textbf{The robust value:}
-$$v^r_i \eqdef \hleg{\vphantom{\min_{m\in[1, M]}}\max_{\pi \in i\mathcal{A^\infty}}} \hler{\min_{m\in[1, M]}} R^{T_m}_\pi$$
-
-\textbf{The robust u-value:}
-$$u_i^r(n) \eqdef
-\begin{cases}
-\hler{\min_{m\in[1, M]}} \sum_{t=0}^{d-1} \gamma^t r_t &\text{if } i \in \mathcal{L}_n \text{ ;}\\
-\hleg{\max_{a\in\mathcal{A}}}\ u_{ia}^r(n) & \text{if } i \in \mathcal{T}_n \setminus \mathcal{L}_n
-\end{cases}$$
-
-\textbf{The robust b-value:}
-$$b_i^r(n) \eqdef
-\begin{cases}
-\hler{\min_{m\in[1, M]}} \sum_{t=0}^{d-1} \gamma^t r_t + \frac{\gamma^d}{1-\gamma} &\text{if } i \in \mathcal{L}_n \text{ ;}\\
-\hleg{\max_{a\in\mathcal{A}}}\ b_{ia}^r(n) & \text{if } i \in \mathcal{T}_n \setminus \mathcal{L}_n 
-\end{cases}$$
-\end{definition}
-}
-            
-\bookboxx{
-\begin{remark}[Ordering of min and max]
-Naive comparison of action values between the different models do not recover the robust policy
-%\includegraphics[width=\textwidth]{../img/min-max-order.eps}
-\end{remark}
-}
+\begin{minipage}[]{0.59\textwidth}
+ We summon the upper-confidence bound from \texttt{kl-UCB} [\cite{Cappe2013}]:
+    \begin{equation*}
+        U^{\mu}_a(m) \eqdef \max \left\{q\in I: T_a(m) d(\hat{\mu}_a(m), q) \leq f(m) \right\}
+    \end{equation*}
     
-\bookboxx{
-\begin{theorem}[Regret bound]
-\label{theorem:drop-regret}
-Algorithm \ref{algo:drop} enjoys a simple regret of:
-\vspace{-0.5\baselineskip}
-\begin{equation}
-\text{If } \hler{\vph\kappa}>1,\qquad 
-\hleb{\vph\mathcal{R}_n} = O\left(\hleg{\vph n}^{-\frac{\log 1/\gamma}{\log \hler{\vph\kappa}}}\right)
-\end{equation}
-\vspace{-\baselineskip}
-\begin{equation}
-\text{If }\hler{\vph\kappa}=1,\qquad
-\hleb{\vph\mathcal{R}_n} = O\left(\gamma^{\frac{(1-\gamma)^\beta}{c}\hleg{\vph n}}\right)
-\end{equation}
-\vspace{-\baselineskip}
+    \begin{center}
+    \begin{tabular}{ccc}
+    \toprule
+        Algorithm & \texttt{OLOP} & \texttt{KL-OLOP} \\
+        \midrule
+        Interval $I$ & $\mathbb{R}$ & [0, 1] \\
+        Divergence $d$ & $d_{\texttt{QUAD}}$ & $d_{\texttt{BER}}$ \\
+        $f(m)$ & $4 \log M$ & $2\log M + 2 \log\log M$\\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+    with
+    \begin{align*}
+    d_{\texttt{QUAD}}(p,q) &\eqdef 2(p-q)^2\\
+    d_{\texttt{BER}}(p, q) &\eqdef p \log \frac{p}{q} + (1-p)\log\frac{1-p}{1-q}
+    \end{align*}
+\end{minipage}
+\begin{minipage}[]{0.4\textwidth}
+    \includegraphics[width=\textwidth]{../img/ukl}
+\end{minipage}
+    
+Conversely,
+\begin{itemize}
+    \item \hlg{$U^{\mu}_a(m) \in I = [0, 1], \forall a$}. 
+    \item The sequence $(U_{a_{1:t}}(m))_t$ is \hlg{non-increasing}
+    \item $B_a(m) = U_a(m)$, the \emph{bound sharpening} step is \hlb{superfluous}.
+\end{itemize}
+}
+
+%----------------------------------------------------------------------------------------
+%	Sample Complexity
+%----------------------------------------------------------------------------------------
+\headerbox{Sample complexity}{name=sample,span=2,column=1,below=klolop}{ 
+\begin{theorem}[Sample complexity]
+\label{thm:regret}
+\KLOLOP enjoys the same asymptotic regret bounds as \OLOP. More precisely, \KLOLOP satisfies:
+\begin{equation*}
+    \expectedvalue r_n = \begin{cases}
+      \tilde{0}\left(n^{-\frac{\log 1/\gamma}{\log \kappa'}}\right), & \text{if}\ \gamma\sqrt{\kappa'} > 1 \\
+      \tilde{0}\left(n^{-\frac{1}{2}}\right), & \text{if}\ \gamma\sqrt{\kappa'} \leq 1
+    \end{cases}
+\end{equation*}
 \end{theorem}
 }
-\end{minipage}
 
-&
+%----------------------------------------------------------------------------------------
+%	Time and Memory Complexity
+%----------------------------------------------------------------------------------------
+\headerbox{Time and memory complexity}{name=time,span=2,column=1,below=sample}{ 
 
-\begin{minipage}[]{0.32\textwidth}
+\begin{tabular}{>{\centering}p{0.45\textwidth}>{\centering}p{0.5\textwidth}}
+\begin{minipage}[]{0.45\textwidth}
+
+\textbf{Original \KLOLOP}
+
+\emph{Compute $B_a(m-1)$ from \eqref{eq:Ba} \hlr{for all $a\in A^L$}}
+
+\textbf{Lazy \KLOLOP}
 \begin{center}
-%\includegraphics[width=.95\textwidth]{../img/robust-control-tree}    
+\includegraphics[width=0.8\textwidth]{../img/tree_svg-tex}    
 \end{center}
 
-\textbf{Variables}
-\begin{itemize}[nolistsep]
-    \item[\incarrow] computational \hlg{budget $n$}
-    \item[\incarrow] near-optimal \hlr{branching factor $\kappa$}
-    \item[\incarrow] simple regret \hlb{$\mathcal{R}_n = v^r - v^r_{a(n)}$}
-\end{itemize}
-\vspace{\baselineskip}
-\begin{normalsize}
-\begin{algorithm}[H]
-\DontPrintSemicolon
-Initialize $\mathcal{T}$ to a root and expand it. Set $n=1$.\;
-\While{Numerical resource available}{
-Compute the robust u-values $u^r_i(n)$ and robust b-values $b^r_i(n)$.\;
-Expand $\argmax_{i\in \mathcal{L}_n} b^r_i(n)$.\;
-n = n + 1\;
-}
-\Return $a(n) = \argmax_{a\in \mathcal{A}} u^r_a(n)$
-\caption{Deterministic Robust Optimistic Planning}
-\label{algo:drop}
-\end{algorithm}
-\end{normalsize}
-
-\end{minipage}
-\end{tabular}
-}
-
-%----------------------------------------------------------------------------------------
-%	Continuous Ambiguity
-%----------------------------------------------------------------------------------------
-\headerbox{\textsc{Continuous ambiguity and interval-based planning}}{name=continuous,span=2,column=1,below=discrete}{ 
-
-\begin{tabular}[T]{cc}
-\begin{minipage}{0.49\textwidth}
-\hlr{\textbf{Approximate}} the robust objective by a \hlg{tractable} surrogate. \vspace{-0.5\baselineskip}
-\bookboxx{
-\begin{definition} Given a policy $\pi$ and current state $s_0$, define
-\textbf{The reachability set} $S$ at time $t$: 
-$$S(t, s_0, \pi) \eqdef \{s_t: \exists T \in \bT \text{ s.t. } s_{k+1} = T(s_{k}, \pi(s_{k}))\}$$
-
-\textbf{The interval hull} {\small \parencite{Puig2005}}
-$$\underline{s}(t, s_0, \pi) \eqdef \min S(t, s_0, \pi) \qquad \overline{s}(t, s_0, \pi) \eqdef \max S(t, s_0, \pi)$$
-\end{definition}
-
-\textbf{The surrogate objective} $\hat{v^r}$
-\begin{equation}
-\hleb{\vphantom{\frac{A}{A}}\hat{v^r}(\pi)} \eqdef \sum_{t=0}^H \gamma^t \min_{s\in \square S(t, s_0, \pi)}  r(s, \pi(s))
-\end{equation}
-}
-
-The approximate performance of a policy is \hlg{guaranteed} on the true environment.
-\vspace{-0.5\baselineskip}
-\bookboxx{
-\begin{proposition}[Lower bound]
-\label{prop:lower-bound}
-The surrogate objective $\hat{v^r}$ is a lower bound of the true objective $v^r$:
-
-\begin{equation}
-\forall \pi,\ \hleb{\vphantom{\frac{A}{A}}\hat{v^r}(\pi)} \leq \hler{\vphantom{\frac{A}{A}}v^r(\pi)}
-\end{equation}
-\end{proposition}
-}
-
+\begin{theorem}[Consistency]
+\label{thm:consistency}
+Algorithm \ref{algo:lazy-kl-olop} is \hlg{identical} to Algorithm \ref{algo:kl-olop}.
+\end{theorem}
 \end{minipage}
 
 &
 
-\begin{minipage}{0.47\textwidth}
-
-\centering
-%\includegraphics[width=0.7\textwidth]{../img/interval-hull}
-
-\begin{footnotesize}
-\begin{algorithm}[H]
-  \SetAlgoLined\DontPrintSemicolon
-  \SetKwFunction{algo}{robust\_control}\SetKwFunction{proc}{evaluate}
-  \SetKwProg{myalg}{Algorithm}{}{}
-  \myalg{\algo{$s_0$}}{
-  Initialize a set $\Pi$ of policies\;
-  \While{resources available}
-  {
-  \proc{} each policy $\pi\in\Pi$ at current state $s_0$\; 
-  Update $\Pi$ by policy search\;  
-  }
-  \KwRet $\argmax_{\pi\in\Pi} \hleb{\hat{v^r}(\pi)}$ \;}{}
-  \setcounter{AlgoLine}{0}
-  \SetKwProg{myproc}{Procedure}{}{}
-  \myproc{\proc{$\pi$, $s_0$}}{
-  \KwRet \hlb{$\hat{v^r}(\pi)$}\;}
-\caption{Interval-based Robust Control}
-\label{algo:irc}
+\begin{minipage}{0.5\textwidth}
+    \begin{algorithm}[H]
+\DontPrintSemicolon
+\footnotesize
+Let $\Tau_0^+ = \LL_0^+ = \{\emptyset\}$\;
+\For{each episode $m = 1, \cdots, M$}{
+Compute $U_a(m-1)$ from \eqref{eq:Ua} for all \hlg{$a\in\Tau_{m-1}^+$}\;
+Compute $B_a(m-1)$ from \eqref{eq:Ba} for all \hlg{$a\in \LL_{m-1}^+$}\;
+Sample a sequence with highest B-value: $a \in \argmax_{\hleg{a\in \LL_{m-1}^+}} B_a(m-1)$\;
+Choose an arbitrary continuation $a^m \in aA^{L-|a|}$\tcp*[h]{e.g. uniformly}
+Let $\Tau_m^+ = \Tau_{m-1}^+$ and $\LL_m^+ = \LL_{m-1}^+$\;
+\For{$t=1, \cdots, L$}{
+    \If{$a^m_{1:t} \not \in \Tau_{m}^+$}{
+    \hlb{Add $a^m_{1:t-1}A$ to $\Tau_{m}^+$ and $\LL_{m}^+$}\;
+    \hlb{Remove $a^m_{1:t-1}$ from $\LL_{m}^+$}
+    }
+}
+}
+\Return the most played $a(n) \in \argmax_{a\in \LL_m^+} T_a(M)$
+\caption{Lazy Open Loop Optimistic Planning}
+\label{algo:lazy-kl-olop}
 \end{algorithm}
-\end{footnotesize}
 \end{minipage}
 \end{tabular}
 
-\vspace{.75\baselineskip}
+\begin{property}[Time and memory complexity]
+\begin{equation*}
+    \frac{C(\texttt{Lazy KL-OLOP})}{C(\texttt{KL-OLOP})} = \frac{\hleg{nK}}{\hler{K^{L}}}
+\end{equation*}
+\end{property}
+
 }
 
 %
@@ -396,52 +327,34 @@ The surrogate objective $\hat{v^r}$ is a lower bound of the true objective $v^r$
 %% Experiments
 %%----------------------------------------------------------------------------------------
 %
-\headerbox{Experiments}{name=experiments,span=2,column=1,below=continuous, above=bottom}{ 
+\headerbox{Experiments}{name=experiments,span=2,column=1,below=time, above=bottom}{ 
 
-We introduce \textsc{highway-env}, a new environment for simulated highway driving and tactical decision-making\footnote{Video and source code are available at https://eleurent.github.io/robust-control/}.
+\textbf{Expanded trees} for a budget $n=10^3$
 
-In these experiments, the \hlg{ego-vehicle} is approaching a roundabout with
-\hly{flowing traffic}. 
+    \includesvg[width=0.33\textwidth]{../img/tree-ODP}    \includesvg[width=0.33\textwidth]{../img/tree-OLOP}
+    \includesvg[width=0.33\textwidth]{../img/tree-KL-OLOP}
 
-We first consider ambiguity with respect to the possible \hlr{destination} of each vehicle (fig \subref*{fig:destination}), and then \wrt their \hlr{driving style} (fig \subref*{fig:driving-style}).
+\textbf{Average return} over 100 runs –- along with its 95\% confidence interval –- with respect to the available budget $n$
 
-
-\begin{figure}[H] 
-  \centering 
-  \begin{tabular}{l}
-  \subfloat[Discrete ambiguity]{\adjustbox{raise=-3.6pc}{
-  %\includegraphics[width=0.27\textwidth]{../img/he-discrete.png}
-  }\label{fig:destination}}\ 
-  \subfloat[Continuous ambiguity]{\adjustbox{raise=-3.6pc}{
-  %\includegraphics[width=0.27\textwidth]{../img/he-interval.png}
-  \label{fig:driving-style}}}\
-    \subfloat[Results]{
-        \begin{tabular}{c c c c} \toprule
-         Ambiguity & Agent & Worst-case & Mean $\pm$ std  \\ \midrule
-         None & Oracle & $9.83$ & $10.84 \pm 0.16$ \\ \midrule
-        \multirow{2}{*}{Discrete} & Nominal & $\hler{\vph 2.09}$ & $8.85 \pm 3.53$ \\
-         & Algorithm \ref{algo:drop} & \textbf{$\hleg{\vph 8.99}$} &  \textbf{$10.78 \pm 0.34$} \\ \midrule
-        \multirow{2}{*}{Continuous} & Nominal & $\hler{\vph 1.99}$ & $9.95 \pm 2.38$ \\
-         & Algorithm \ref{algo:irc} & \textbf{$\hleg{\vph 7.88}$} & \textbf{$10.73 \pm 0.61$} \\ \bottomrule
-         \end{tabular}
-      }
-  \end{tabular}
-\end{figure}
+     \includesvg[width=0.33\textwidth]{../img/hw_return}
+     \includesvg[width=0.33\textwidth]{../img/gw_return}
+     \includesvg[width=0.33\textwidth]{../img/gw_stoch_return}
 }
+
 
 
 %----------------------------------------------------------------------------------------
 %	Acknowledgements
 %----------------------------------------------------------------------------------------
-\headerbox{Acknowledgements}{name=ack,column=0,span=1,below=tools}{
-This work has been supported by CPER Nord-Pas de Calais/FEDER DATA Advanced data science and technologies 2015-2020, the French Ministry of Higher Education and Research, INRIA, and the French Agence Nationale de la Recherche (ANR).
-}
+% \headerbox{Acknowledgements}{name=ack,column=0,span=1,below=tools}{
+% This work has been supported by CPER Nord-Pas de Calais/FEDER DATA Advanced data science and technologies 2015-2020, the French Ministry of Higher Education and Research, INRIA, and the French Agence Nationale de la Recherche (ANR).
+% }
 
 
 %----------------------------------------------------------------------------------------
 %	References
 %----------------------------------------------------------------------------------------
-\headerbox{References}{name=refs,column=0,span=1,below=ack, above=bottom}{
+\headerbox{References}{name=refs,column=0,span=1,below=tools, above=bottom}{
     {
     \AtNextBibliography{\footnotesize}
     \setlength{\bibitemsep}{3pt}
