@@ -1,16 +1,17 @@
 \let\accentvec\vec            %add before \documentclass
-\documentclass[runningheads]{llncs}
+\documentclass[runningheads, envcountsame, a4paper]{llncs}
 \let\spvec\vec                %add before \usepackage{amsmath}
 \let\vec\accentvec
 
 \usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
 \usepackage{lmodern}
-\usepackage{url}            % simple URL typesetting
+\usepackage[hyphens]{url}            % simple URL typesetting
 \usepackage{booktabs}       % professional-quality tables
 \usepackage{amsfonts}       % blackboard math symbols
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
 \usepackage{microtype}      % microtypography
+\usepackage[misc]{ifsym}
 
 \newcommand{\citep}{\cite}
 \newcommand{\citet}{\cite}
@@ -48,22 +49,27 @@
 
 %
 \title{Practical Open-Loop Optimistic Planning}
+\toctitle{Practical Open-Loop Optimistic Planning}
 %
 %\titlerunning{Abbreviated paper title}
 % If the paper title is too long for the running head, you can set
 % an abbreviated paper title here
 %
-\author{Edouard Leurent\inst{1,2}\and
+\author{Edouard Leurent\inst{1,2}(\Letter)\and
 Odalric-Ambrym Maillard\inst{1}}
+\tocauthor{Edouard~Leurent and
+Odalric-Ambrym~Maillard}
 %
-\authorrunning{E. Leurent, O-A. Maillard}
+\authorrunning{E. Leurent and O-A. Maillard}
 % First names are abbreviated in the running head.
 % If there are more than two authors, 'et al.' is used.
 %
 \institute{SequeL team, INRIA Lille - Nord Europe, France\\
-\email{\{edouard.leurent,odalric.maillard\}@inria.fr}\and
-Renault Group, France\\
-\email{edouard.leurent@renault.com}}
+\email{$\{$edouard.leurent,odalric.maillard$\}$@inria.fr}\and
+Renault Group, France
+%\\
+%\email{edouard.leurent@renault.com}
+}
 %
 \maketitle              % typeset the header of the contribution
 %
@@ -78,7 +84,7 @@ Renault Group, France\\
 
 In a \emph{Markov Decision Process} (MDP), an agent observes its current state $s$ from a state space $S$ and picks an action $a$ from an action space $A$, before transitioning to a next state $s'$ drawn from a transition kernel $\probability{s'|s,a}$ and receiving a bounded reward $r\in[0, 1]$ drawn from a reward kernel $\probability{r|s, a}$. The agent must act so as to optimise its expected cumulative discounted reward $\expectedvalue \sum_t \gamma^t r_t$, also called expected \emph{return}, where $\gamma\in[0,1)$ is the discount factor. In \emph{Online Planning} \cite{Munos2014}, we do not consider that these transition and reward kernels are known as in \emph{Dynamic Programming} \citep{Bellman1957}, but rather only assume access to the MDP through a \emph{generative model} (e.g. a simulator) which yields samples of the next state $s' \sim \probability{s'|s,a}$ and reward $r\sim\probability{r|s, a}$ when queried. Finally, we consider a \emph{fixed-budget} setting where the generative model can only be called a maximum number of times, called the budget $n$. 
 
-\emph{Monte-Carlo Tree Search} (\texttt{MCTS}) algorithms were historically motivated by the application of computer Go, and made a first appearance in the CrazyStone software \citet{Coulom2006}. They were later reformulated in the setting of Multi-Armed Bandits by \citet{Kocsis2006} with their \emph{Upper Confidence bounds applied to Trees} (\texttt{UCT}) algorithm. Despite its popularity, \texttt{UCT} has been shown to suffer from several limitations: its sample complexity can be at least doubly-exponential for some problems (e.g. when a narrow optimal path is hidden in a suboptimal branch), which is much worse than uniform planning \citep{Coquelin2007}. The \texttt{Sparse Sampling} algorithm of \citet{Kearns2002} achieves better worst-case performance, but it is still non-polynomial and doesn't adapt to the structure of the MDP. In stark contrast, the \emph{Optimistic Planning for Deterministic systems} (\texttt{OPD}) algorithm considered by \citet{Hren2008} in the case of deterministic transitions and rewards exploits the structure of the cumulative discounted reward to achieve a problem-dependent polynomial bound on sample complexity. A similar line of work in a deterministic setting is that of \texttt{SOOP} and \texttt{OPC} by \cite{Busoniu2013,Busoniu2018} though they focus on continuous action spaces. \texttt{OPD} was later extended to stochastic systems with the \emph{Open-Loop Optimistic Planning} (\OLOP) algorithm introduced by \citet{Bubeck2010} in the open-loop setting: we only consider sequences of actions independently of the states that they lead to. This restriction in the space of policies causes a loss of optimality, but greatly simplifies the planning problem in the cases where the state space is large or infinite. More recent work such as \texttt{St0p} \citep{Szorenyi2014} and \texttt{TrailBlazer} \citep{Grill2016} focus on the probably approximately correct (PAC) framework: rather than simply recommending an action to maximise the expected rewards, they return an $\epsilon$-approximation of the value at the root that holds with high probability. This highly demanding framework puts a severe strain on these algorithms that were developed for theoretical analysis only and cannot be applied to real problems.
+\emph{Monte-Carlo Tree Search} (\texttt{MCTS}) algorithms were historically motivated by the application of computer Go, and made a first appearance in the CrazyStone software \citet{Coulom2006}. They were later reformulated in the setting of Multi-Armed Bandits by \citet{Kocsis2006} with their \emph{Upper Confidence bounds applied to Trees} (\texttt{UCT}) algorithm. Despite its popularity \citep{Silver2016,Silver2017,Silver2018}, \texttt{UCT} has been shown to suffer from several limitations: its sample complexity can be at least doubly-exponential for some problems (e.g. when a narrow optimal path is hidden in a suboptimal branch), which is much worse than uniform planning \citep{Coquelin2007}. The \texttt{Sparse Sampling} algorithm of \citet{Kearns2002} achieves better worst-case performance, but it is still non-polynomial and doesn't adapt to the structure of the MDP. In stark contrast, the \emph{Optimistic Planning for Deterministic systems} (\texttt{OPD}) algorithm considered by \citet{Hren2008} in the case of deterministic transitions and rewards exploits the structure of the cumulative discounted reward to achieve a problem-dependent polynomial bound on sample complexity. A similar line of work in a deterministic setting is that of \texttt{SOOP} and \texttt{OPC} by \cite{Busoniu2013,Busoniu2018} though they focus on continuous action spaces. \texttt{OPD} was later extended to stochastic systems with the \emph{Open-Loop Optimistic Planning} (\OLOP) algorithm introduced by \citet{Bubeck2010} in the open-loop setting: we only consider sequences of actions independently of the states that they lead to. This restriction in the space of policies causes a loss of optimality, but greatly simplifies the planning problem in the cases where the state space is large or infinite. More recent work such as \texttt{St0p} \citep{Szorenyi2014} and \texttt{TrailBlazer} \citep{Grill2016} focus on the probably approximately correct (PAC) framework: rather than simply recommending an action to maximise the expected rewards, they return an $\epsilon$-approximation of the value at the root that holds with high probability. This highly demanding framework puts a severe strain on these algorithms that were developed for theoretical analysis only and cannot be applied to real problems.
 
 \paragraph{Contributions} The goal of this paper is to study the practical performances of \OLOP when applied to numerical problems. Indeed, \OLOP was introduced along with a theoretical sample complexity analysis but no experiment was carried-out. Our contribution is threefold:
 
@@ -366,7 +372,7 @@ The corresponding complexity gain compared to the original Algorithm \ref{algo:k
 which highlights that only a subtree corresponding to the sample budget $n$ is processed instead of the search whole tree $\Tau$.
 \end{property}
 \begin{proof}
-At episode $m = 1, \cdots, M$, we compute and store in memory of the reward upper-bounds and U-values of all nodes in the subtree $\Tau_m^+$. Moreover, the tree $\Tau_m^+$ is constructed iteratively by adding K nodes at most L times at each episode from 0 to $m$. Hence, $|\Tau_m^+| = O(mKL)$.
+At episode $m = 1, \cdots, M$, we compute and store in memory the reward upper-bounds and U-values of all nodes in the subtree $\Tau_m^+$. Moreover, the tree $\Tau_m^+$ is constructed iteratively by adding K nodes at most L times at each episode from 0 to $m$. Hence, $|\Tau_m^+| = O(mKL)$.
 This yields directly $C(\texttt{Lazy KL-OLOP}) = \sum_{m=1}^M O(mKL) = O(M^2KL)$.
 \qed
 \end{proof}
@@ -385,9 +391,9 @@ Considering sequences of actions of length $1 \leq h \leq H$, we define the subs
 \end{equation*}
 
 By convention, $\mathcal{I}_0 = \{\emptyset\}$. From the definition of $\kappa_2$, we have that for any $\kappa'>\kappa_2$, there exists a constant C such that for any $h \geq 1$,
-\begin{equation*}
-    |\mathcal{I}_h| \leq C {\kappa'}^h
-\end{equation*}
+%\begin{equation*}
+    $|\mathcal{I}_h| \leq C {\kappa'}^h$
+%\end{equation*}
 Hence, we also have $|\mathcal{J}_h| \leq K|\mathcal{I}_{h-1}| = O({\kappa'}^h)$.
 
 Now, for $1\leq m \leq M$, $a \in A^t$ with $t \leq h$, $h'<h$, we define the set $\mathcal{P}^a_{h,h'}(m)$ of suffixes of $a$ in $\mathcal{J}_h$ that have been played at least a certain number of times:
@@ -472,45 +478,45 @@ Since $V \leq \sum_{t=1}^h \gamma^t \mu(a^*_{1:t}) + \frac{\gamma^{h+1}}{1-\gamm
     &\leq \sum_{t=1}^L\probability{U^{\mu}_{a^*_{1:t}}(m) \leq \mu(a^*_{1:t})}
 \end{align*}
 
-In order to bound this quantity, \diff{we reduce the question to the application of a deviation inequality}. For all $1\leq t\leq L$, we have on the event $\{U^{\mu}_{a^*_{1:t}}(m) \leq \mu(a^*_{1:t})\}$ that $\hat{\mu}_{a^*_{1:t}}(m) \leq U^{\mu}_{a^*_{1:t}}(m) \leq \mu(a^*_{1:t}) < 1$. Therefore, for all $0 < \delta < 1 - \mu(a^*_{1:t})$, by definition of $U^{\mu}_{a^*_{1:t}}(m)$:
+\diff{In order to bound this quantity, we reduce the question to the application of a deviation inequality. For all $1\leq t\leq L$, we have on the event $\{U^{\mu}_{a^*_{1:t}}(m) \leq \mu(a^*_{1:t})\}$ that $\hat{\mu}_{a^*_{1:t}}(m) \leq U^{\mu}_{a^*_{1:t}}(m) \leq \mu(a^*_{1:t}) < 1$. Therefore, for all $0 < \delta < 1 - \mu(a^*_{1:t})$, by definition of $U^{\mu}_{a^*_{1:t}}(m)$:}
 
 \begin{equation*}
-    d(\hat{\mu}_{a^*_{1:t}}(m), U^{\mu}_{a^*_{1:t}}(m)+\delta) > \frac{f(m)}{T_{a^*_{1:t}}(m)}
+    \diff{d(\hat{\mu}_{a^*_{1:t}}(m), U^{\mu}_{a^*_{1:t}}(m)+\delta) > \frac{f(m)}{T_{a^*_{1:t}}(m)}}
 \end{equation*}
 
-As $d$ is continuous on $(0,1)\times[0, 1]$, we have by letting $\delta \leftarrow 0$ that:
+\diff{As $d$ is continuous on $(0,1)\times[0, 1]$, we have by letting $\delta \rightarrow 0$ that:}
 
 \begin{equation*}
-    d(\hat{\mu}_{a^*_{1:t}}(m), U^{\mu}_{a^*_{1:t}}(m)) \geq \frac{f(m)}{T_{a^*_{1:t}}(m)}
+    \diff{d(\hat{\mu}_{a^*_{1:t}}(m), U^{\mu}_{a^*_{1:t}}(m)) \geq \frac{f(m)}{T_{a^*_{1:t}}(m)}}
 \end{equation*}
 
-Since d is non-decreasing on $[\hat{\mu}_{a^*_{1:t}}(m), \mu(a^*_{1:t})]$,
+\diff{Since d is non-decreasing on $[\hat{\mu}_{a^*_{1:t}}(m), \mu(a^*_{1:t})]$,}
 
 \begin{equation*}
-    d(\hat{\mu}_{a^*_{1:t}}(m), \mu(a^*_{1:t})) \geq d(\hat{\mu}_{a^*_{1:t}}(m), U^{\mu}_{a^*_{1:t}}(m)) \geq \frac{f(m)}{T_{a^*_{1:t}}(m)}
+    \diff{d(\hat{\mu}_{a^*_{1:t}}(m), \mu(a^*_{1:t})) \geq d(\hat{\mu}_{a^*_{1:t}}(m), U^{\mu}_{a^*_{1:t}}(m)) \geq \frac{f(m)}{T_{a^*_{1:t}}(m)}}
 \end{equation*}
 
-We have thus shown the following inclusion:
+\diff{We have thus shown the following inclusion:}
 
 \begin{equation*}
-    \{U^{\mu}_{a^*_{1:t}}(m) \leq \mu(a^*_{1:t})\} \subseteq \left\{ \mu(a^*_{1:t}) > \hat{\mu}_{a^*_{1:t}}(m) \text{ and } d(\hat{\mu}_{a^*_{1:t}}(m), \mu(a^*_{1:t})) \geq \frac{f(m)}{T_{a^*_{1:t}}(m)} \right\}
+    \diff{\{U^{\mu}_{a^*_{1:t}}(m) \leq \mu(a^*_{1:t})\} \subseteq \left\{ \mu(a^*_{1:t}) > \hat{\mu}_{a^*_{1:t}}(m) \text{ and } d(\hat{\mu}_{a^*_{1:t}}(m), \mu(a^*_{1:t})) \geq \frac{f(m)}{T_{a^*_{1:t}}(m)} \right\}}
 \end{equation*}
 
-Decomposing according to the values of $T_{a^*_{1:t}}(m)$ yields:
+\diff{Decomposing according to the values of $T_{a^*_{1:t}}(m)$ yields:}
 
 \begin{equation*}
-    \{U^{\mu}_{a^*_{1:t}}(m) \leq \mu(a^*_{1:t})\} \subseteq \bigcup_{n=1}^m \left\{ \mu(a^*_{1:t}) > \hat{\mu}_{a^*_{1:t}, n} \text{ and } d(\hat{\mu}_{a^*_{1:t}, n}, \mu(a^*_{1:t})) \geq \frac{f(m)}{n} \right\}
+    \diff{\{U^{\mu}_{a^*_{1:t}}(m) \leq \mu(a^*_{1:t})\} \subseteq \bigcup_{n=1}^m \left\{ \mu(a^*_{1:t}) > \hat{\mu}_{a^*_{1:t}, n} \text{ and } d(\hat{\mu}_{a^*_{1:t}, n}, \mu(a^*_{1:t})) \geq \frac{f(m)}{n} \right\}}
 \end{equation*}
 
-\diff{We now apply the deviation inequality} provided in Lemma 2 of Appendix A in \citep{Cappe2013}: $\forall \epsilon > 1$, provided that $0 < \mu(a^*_{1:t}) < 1$,
+\diff{We now apply the deviation inequality provided in Lemma 2 of Appendix A in \citep{Cappe2013}: $\forall \epsilon > 1$, provided that $0 < \mu(a^*_{1:t}) < 1$,}
 
 \begin{equation*}
-\probability{\bigcup_{n=1}^m \left\{ \mu(a^*_{1:t}) > \hat{\mu}_{a^*_{1:t}, n} \text{ and } n \dber(\hat{\mu}_{a^*_{1:t}, n}, \mu(a^*_{1:t})) \geq \epsilon \right\}} \leq e\ceil{\epsilon \log m}e^{-\epsilon}\,.
+\diff{\probability{\bigcup_{n=1}^m \left\{ \mu(a^*_{1:t}) > \hat{\mu}_{a^*_{1:t}, n} \text{ and } n \dber(\hat{\mu}_{a^*_{1:t}, n}, \mu(a^*_{1:t})) \geq \epsilon \right\}} \leq e\ceil{\epsilon \log m}e^{-\epsilon}\,.}
 \end{equation*}
 
-By choosing $\epsilon = f(m)$, it comes
+\diff{By choosing $\epsilon = f(m)$, it comes}
 \begin{align*}
-    \probability{\eqref{eq:cond-ukl}} &\leq \sum_{t=1}^L \diff{e\ceil{f(m)\log m}e^{-f(m)}} = \diff{O(L\delta_m)}
+    \diff{\probability{\eqref{eq:cond-ukl}} \leq \sum_{t=1}^L e\ceil{f(m)\log m}e^{-f(m)} = O(L\delta_m)}
 \end{align*}
 
 The same reasoning gives: $\quad\displaystyle{
@@ -532,20 +538,20 @@ and
 \end{equation}
 \end{lemma}
 \begin{proof}
-We start by providing an explicit upper-bound for the length of the confidence interval $U^{\mu}_{a_{1:t}} - L^{\mu}_{a_{1:t}}$. By Pinsker's inequality:
+We start by providing an explicit upper-bound for the length of the confidence interval $U^{\mu}_{a_{1:t}} - L^{\mu}_{a_{1:t}}$. \diff{By Pinsker's inequality:}
  
 \begin{equation*}
     \diff{\dber(p, q) > \dquad(p, q)}
 \end{equation*}
 
-Hence for all $C>0$, 
+\diff{Hence for all $C>0$, }
 \begin{equation*}
-    \dber(p, q) \leq C   \implies 2(q - p)^2 < C  \implies p - \sqrt{C/2} < q < p + \sqrt{C/2}
+    \diff{\dber(p, q) \leq C   \implies 2(q - p)^2 < C  \implies p - \sqrt{C/2} < q < p + \sqrt{C/2}}
 \end{equation*}
-And thus, for all $b\in A^*$, by definition of $U^{\mu}$ and $L^{\mu}$:
+\diff{And thus, for all $b\in A^*$, by definition of $U^{\mu}$ and $L^{\mu}$:}
 \begin{align*}
-    U^{\mu}_{b}(m) - L^{\mu}_{b}(m) &\leq \frac{S_b(m)}{T_b(m)} + \sqrt{\frac{f(m)}{2T_b(m)}} -  \left(\frac{S_b(m)}{T_b(m)} - \sqrt{\frac{f(m)}{2T_b(m)}}\right) 
-    = \diff{\sqrt{\frac{2f(m)}{T_b(m)}}}
+    \diff{U^{\mu}_{b}(m) - L^{\mu}_{b}(m) \leq \frac{S_b(m)}{T_b(m)} + \sqrt{\frac{f(m)}{2T_b(m)}} -  \left(\frac{S_b(m)}{T_b(m)} - \sqrt{\frac{f(m)}{2T_b(m)}}\right) 
+    = \sqrt{\frac{2f(m)}{T_b(m)}}}
 \end{align*}
 
 Now, assume that \eqref{eq:sampled-enough-h} and \eqref{eq:sampled-enough} are true. Then, we clearly have:
@@ -623,7 +629,7 @@ We have performed some numerical experiments to evaluate and compare the followi
 
 They are evaluated on the following tasks, using a discount factor of $\gamma=0.8$:
 \begin{itemize}
-    \item A \href{https://github.com/eleurent/highway-env/}{highway driving} environment \citep{Leurent2018}: a vehicle is driving on a road randomly populated with other slower drivers, and must make their way as fast as possible while avoiding collisions by choosing on the the following actions: \texttt{change-lane-left}, \texttt{change-lane-right}, \texttt{no-op}, \texttt{faster}, \texttt{slower}.
+    \item A \href{https://github.com/eleurent/highway-env/}{highway driving} environment \citep{highway-env}: a vehicle is driving on a road randomly populated with other slower drivers, and must make their way as fast as possible while avoiding collisions by choosing on the the following actions: \texttt{change-lane-left}, \texttt{change-lane-right}, \texttt{no-op}, \texttt{faster}, \texttt{slower}.
     \item A \href{https://github.com/maximecb/gym-minigrid}{gridworld} environment \citep{gym_minigrid}: the agent navigates in a randomly-generated gridworld composed of either empty cells, terminal lava cells, and goal cells where a reward of $1$ is collected at the first visit.
     \item A stochastic version of the gridworld environment with noisy rewards, where the noise is modelled as a Bernoulli distribution with a 15\% probability of error, i.e. receiving a reward of 1 in an empty cell or 0 in a goal cell.
 \end{itemize}
@@ -662,79 +668,11 @@ The results of our experiments are shown in Figure \ref{fig:experiments}. The \t
 
 We introduced an enhanced version of the \OLOP algorithm for open-loop online planning, whose design was motivated by an investigation of the over-conservative search behaviours of \OLOP. We analysed its sample complexity and showed that the original regret bounds are preserved, while its empirical performances are increased by an order of magnitude in several numerical experiments. Finally, we proposed an efficient implementation that benefits from a substantial speedup, facilitating its use for real-time planning applications.
 
+\section*{Acknowledgments}
+This work has been supported by CPER Nord-Pas de Calais/FEDER DATA Advanced data science and technologies 2015-2020, the French Ministry of Higher Education and Research, INRIA, and the French Agence Nationale de la Recherche.
+
 \bibliographystyle{splncs04}
-\begin{thebibliography}{10}
-\providecommand{\url}[1]{\texttt{#1}}
-\providecommand{\urlprefix}{URL }
-\providecommand{\doi}[1]{https://doi.org/#1}
-
-\bibitem{Bellman1957}
-Bellman, R.: {Dynamic Programming}. Princeton University Press  (1957)
-
-\bibitem{Bubeck2010}
-Bubeck, S., Munos, R.: {Open Loop Optimistic Planning}. In: Proc. of COLT
-  (2010)
-
-\bibitem{Busoniu2013}
-Buşoniu, L., Daniels, A., Munos, R., Babuska, R.: {Optimistic planning for
-  continuous-action deterministic systems}. IEEE Symposium on Adaptive Dynamic
-  Programming and Reinforcement Learning, ADPRL  (2013)
-
-\bibitem{Busoniu2018}
-Buşoniu, L., P{\'{a}}ll, E., Munos, R.: {Continuous-action planning for
-  discounted infinite-horizon nonlinear optimal control with Lipschitz values}.
-  Automatica  \textbf{92}(December),  100--108 (2018)
-
-\bibitem{Cappe2013}
-Capp{\'{e}}, O., Garivier, A., Maillard, O.A., Munos, R., Stoltz, G.:
-  {Kullback-Leibler Upper Confidence Bounds for Optimal Sequential Allocation}.
-  The Annals of Statistics  \textbf{41}(3),  1516--1541 (2013)
-
-\bibitem{gym_minigrid}
-Chevalier-Boisvert, M., Willems, L., Pal, S.: Minimalistic gridworld
-  environment for openai gym. \url{https://github.com/maximecb/gym-minigrid}
-  (2018)
-
-\bibitem{Coquelin2007}
-Coquelin, P.A., Munos, R.: {Bandit Algorithms for Tree Search}. Proc. of UAI
-  (2007)
-
-\bibitem{Coulom2006}
-Coulom, R.: {Efficient Selectivity and Backup Operators in Monte-Carlo Tree
-  Search}. In: {Proc. of International Conference on Computer and Games} (2006)
-
-\bibitem{Grill2016}
-Grill, J.B., Valko, M., Munos, R.: {Blazing the trails before beating the path:
-  Sample-efficient Monte-Carlo planning}. In: Proc. of NeurIPS (2016)
-
-\bibitem{Hren2008}
-Hren, J.F., Munos, R.: {Optimistic planning of deterministic systems}. Lecture
-  Notes in Computer Science  (2008)
-
-\bibitem{Kearns2002}
-Kearns, M., Mansour, Y., Ng, A.Y.: {A sparse sampling algorithm for
-  near-optimal planning in large Markov decision processes}. In: Proc. of IJCAI
-  (2002)
-
-\bibitem{Kocsis2006}
-Kocsis, L., Szepesv\'{a}ri, C.: Bandit based monte-carlo planning. In: Proc. of
-  ECML (2006)
-
-\bibitem{Leurent2018}
-Leurent, E., Blanco, Y., Efimov, D., Maillard, O.A.: {Approximate Robust
-  Control of Uncertain Dynamical Systems}. NeurIPS Machine Learning for
-  Intelligent Transportation Systems Workshop  (2018)
-
-\bibitem{Munos2014}
-Munos, R.: {From Bandits to Monte-Carlo Tree Search: The Optimistic Principle
-  Applied to Optimization and Planning}. Foundations and
-  Trends{\textregistered} in Machine Learning  (2014)
-
-\bibitem{Szorenyi2014}
-Szorenyi, B., Kedenburg, G., Munos, R.: {Optimistic planning in Markov decision
-  processes using a generative model}. In: Proc. of NeurIPS (2014)
-
-\end{thebibliography}
+\bibliography{references}
 
 %\begin{comment}
 \newpage
