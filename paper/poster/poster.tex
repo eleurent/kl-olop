@@ -138,7 +138,7 @@ We consider the optimal control of an MDP $\cM = (\cS, cA, R, T, \gamma)$ with b
 \begin{itemize}[nolistsep]
     \item[\incarrow] $R$ and $T$ are \hlr{unknown}
     \item[\incarrow] Access to a \hlb{generative model} $s' \sim \probability{s'|s,a}$ and $r\sim\probability{r|s, a}$
-    \item[\incarrow] \hlr{Fixed-budget} setting: the generative model can be queried $n$ times
+    \item[\incarrow] \hlr{Fixed-budget} setting: the generative model is \hlr{costly}, can only be queried $n$ times
 \end{itemize}
 }
 
@@ -148,7 +148,12 @@ We consider the optimal control of an MDP $\cM = (\cS, cA, R, T, \gamma)$ with b
 \headerbox{\textsc{Open-Loop Optimistic Planning}}{name=setting,span=1,column=0,row=0,below=motivation}{
 \OLOP algorithm introduced in [\cite{Bubeck2010}].
 
-Split the budget $n$ into $M$ sequences of length $L$.
+\begin{center}
+    \hlb{Optimism in the Face of Uncertainty}\\
+    \incarrow~ in \hlr{observed} and \hlr{future} rewards
+    
+\end{center}
+%Split the budget $n$ into $M$ sequences of length $L$.
 %Let $M$ be the largest integer such that $M \log M/(2 \log 1/\gamma) \leq n$\;
 %Let $L = \log M / (2 \log 1/\gamma)$\;
     
@@ -180,7 +185,7 @@ Sample a sequence with highest B-value: $a^m \in \argmax_{a\in A^L} B_a(m-1)$.\;
 {name=tools,column=0,below=setting,span =1}
 {
 
-Overly pessimistic, especially in the low-budget regime.
+\hlr{Overly pessimistic}, especially in the low-budget regime.
 
 \begin{equation}
          U^{\mu}_a(m) = \hat{\mu}_a(m) + \sqrt{\frac{2 \log M}{T_a(m)}}
