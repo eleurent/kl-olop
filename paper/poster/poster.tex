@@ -18,7 +18,7 @@
 %	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
 %----------------------------------------------------------------------------------------
 
-\documentclass[paperwidth=36in, paperheight=48in,portrait,fontscale=0.35, margin=2cm]{baposter}
+\documentclass[a0paper,portrait,fontscale=0.35, margin=2cm]{baposter}
 
 \usepackage[utf8]{inputenc}
 \usepackage[font=normalsize,labelfont=bf]{caption} % Required for specifying captions to tables and figures
@@ -120,7 +120,7 @@ Practical Open-Loop Optimistic Planning
 }
 {
 Edouard Leurent, Odalric-Ambrym Maillard
-\vspace{-3\baselineskip}
+\vspace{-4\baselineskip}
 }
 {
 \includegraphics[width=14em]{./img/inria_sc}
@@ -134,7 +134,7 @@ Edouard Leurent, Odalric-Ambrym Maillard
 
 \headerbox{\textsc{Motivation}}{name=motivation,span=1,column=0,row=0}{
 
-We consider the optimal control of an MDP $\cM = (\cS, cA, R, T, \gamma)$ with bounded rewards $R$
+We consider the optimal control of an MDP $\cM = (\cS, A, R, T, \gamma)$ with bounded rewards $R\in[0,1]$
 \begin{itemize}[nolistsep]
     \item[\incarrow] $R$ and $T$ are \hlr{unknown}
     \item[\incarrow] Access to a \hlb{generative model} $s' \sim \probability{s'|s,a}$ and $r\sim\probability{r|s, a}$
@@ -148,18 +148,22 @@ We consider the optimal control of an MDP $\cM = (\cS, cA, R, T, \gamma)$ with b
 \headerbox{\textsc{Open-Loop Optimistic Planning}}{name=setting,span=1,column=0,row=0,below=motivation}{
 \OLOP algorithm introduced in [\cite{Bubeck2010}].
 
-\begin{center}
-    \hlb{Optimism in the Face of Uncertainty}\\
-    \incarrow~ in \hlr{observed} and \hlr{future} rewards
-    
-\end{center}
+
 %Split the budget $n$ into $M$ sequences of length $L$.
 %Let $M$ be the largest integer such that $M \log M/(2 \log 1/\gamma) \leq n$\;
 %Let $L = \log M / (2 \log 1/\gamma)$\;
-    
-\includesvg[width=\textwidth]{img/olop-explain.svg}
-\includesvg[width=\textwidth]{img/olop-explain-2.svg}
-
+\begin{enumerate}
+    \item Sample $M$ sequences of actions of fixed length $L$
+    \begin{center}
+\includesvg[width=0.8\textwidth]{img/olop-explain.svg}
+\end{center}
+    \item Use the \hlb{return structure} to \hlb{generalise} to unseen sequences
+    \begin{center}
+\includesvg[width=0.8\textwidth]{img/olop-explain-2.svg}
+\end{center}
+\item Be \hlb{Optimistic in the Face of Uncertainty}\\
+    \incarrow~ in \hlr{observed} and \hlr{future} rewards
+\end{enumerate}
 
 \begin{center}
 \begin{algorithm}[H]
@@ -205,7 +209,9 @@ Sample a sequence with highest B-value: $a^m \in \argmax_{a\in A^L} B_a(m-1)$.\;
         \item Then \hlr{$B_a(m) = U_{a_{1:1}}(m)$}
     \end{itemize}
 
-\includesvg[width=\textwidth]{img/olop-explain-3.svg}
+\begin{center}
+\includesvg[width=0.8\textwidth]{img/olop-explain-3.svg}    
+\end{center}
 
 \begin{center}
 \texttt{OLOP} behaves as \hlr{uniform planning}!    
@@ -221,7 +227,7 @@ Sample a sequence with highest B-value: $a^m \in \argmax_{a\in A^L} B_a(m-1)$.\;
 \begin{minipage}[]{0.59\textwidth}
  We summon the upper-confidence bound from \texttt{kl-UCB} [\cite{Cappe2013}]:
     \begin{equation*}
-        U^{\mu}_a(m) \eqdef \max \left\{q\in I: T_a(m) d(\hat{\mu}_a(m), q) \leq f(m) \right\}
+        U^{\mu}_a(m) \eqdef \max \left\{q\in I: d(\hat{\mu}_a(m), q) \leq \frac{f(m)}{T_a(m)} \right\}
     \end{equation*}
     
     \begin{center}
@@ -333,17 +339,18 @@ Let $\Tau_m^+ = \Tau_{m-1}^+$ and $\LL_m^+ = \LL_{m-1}^+$\;
 %%----------------------------------------------------------------------------------------
 %
 \headerbox{Experiments}{name=experiments,span=2,column=1,below=time, above=bottom}{ 
-
-\textbf{Expanded trees} for a budget $n=10^3$
-
-    \includesvg[width=0.33\textwidth]{../img/tree-ODP}    \includesvg[width=0.33\textwidth]{../img/tree-OLOP}
-    \includesvg[width=0.33\textwidth]{../img/tree-KL-OLOP}
-
-\textbf{Average return} over 100 runs –- along with its 95\% confidence interval –- with respect to the available budget $n$
-
      \includesvg[width=0.33\textwidth]{../img/hw_return}
      \includesvg[width=0.33\textwidth]{../img/gw_return}
      \includesvg[width=0.33\textwidth]{../img/gw_stoch_return}
+     \begin{center}
+         \textbf{Average return} over 100 runs –- along with its 95\% confidence interval –- with respect to the available budget $n$
+     \end{center}
+
+    \includesvg[width=0.33\textwidth]{../img/tree-ODP}    \includesvg[width=0.33\textwidth]{../img/tree-OLOP}
+    \includesvg[width=0.33\textwidth]{../img/tree-KL-OLOP}
+    \begin{center}
+        \textbf{Expanded trees} for a budget $n=10^3$
+    \end{center}
 }
 
 

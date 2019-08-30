@@ -371,7 +371,7 @@
       <path
          inkscape:connector-curvature="0"
          transform="matrix(0.4,0,0,0.4,2.96,0.4)"
-         style="fill:#008600;fill-opacity:1;fill-rule:evenodd;stroke:#008600;stroke-width:1.00000003pt;stroke-opacity:1"
+         style="fill:#ff9955;fill-opacity:1;fill-rule:evenodd;stroke:#de8600;stroke-width:1.00000003pt;stroke-opacity:1"
          d="m -2.5,-1 c 0,2.76 -2.24,5 -5,5 -2.76,0 -5,-2.24 -5,-5 0,-2.76 2.24,-5 5,-5 2.76,0 5,2.24 5,5 z"
          id="path5526-5" />
     </marker>
@@ -386,7 +386,7 @@
       <path
          inkscape:connector-curvature="0"
          transform="matrix(0.4,0,0,0.4,2.96,0.4)"
-         style="fill:#008600;fill-opacity:1;fill-rule:evenodd;stroke:#008600;stroke-width:1.00000003pt;stroke-opacity:1"
+         style="fill:#ff9955;fill-opacity:1;fill-rule:evenodd;stroke:#de8600;stroke-width:1.00000003pt;stroke-opacity:1"
          d="m -2.5,-1 c 0,2.76 -2.24,5 -5,5 -2.76,0 -5,-2.24 -5,-5 0,-2.76 2.24,-5 5,-5 2.76,0 5,2.24 5,5 z"
          id="path5860-9" />
     </marker>
@@ -814,7 +814,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -850,7 +850,7 @@
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc" />
     <path
-       style="fill:none;stroke:#008600;stroke-width:0.26499999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#marker5528-5);marker-mid:url(#marker5528-5);marker-end:url(#marker5862-9)"
+       style="fill:#ff9955;stroke:#de8600;stroke-width:0.26499999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#marker5528-5);marker-mid:url(#marker5528-5);marker-end:url(#marker5862-9)"
        d="M 121.70833,19.1875 111.125,29.770833"
        id="path3803-7"
        inkscape:connector-curvature="0"

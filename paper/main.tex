@@ -634,26 +634,19 @@ They are evaluated on the following tasks, using a discount factor of $\gamma=0.
     \item A stochastic version of the gridworld environment with noisy rewards, where the noise is modelled as a Bernoulli distribution with a 15\% probability of error, i.e. receiving a reward of 1 in an empty cell or 0 in a goal cell.
 \end{itemize}
 
-\begin{figure}[htp]
+\begin{figure}[pth]
 \centering
-%\begin{minipage}{\textwidth}
-%      \includegraphics[width=\textwidth]{img/hw_return_svg-tex}
-%      \label{sub:highway}
-%      \includegraphics[width=0.5\textwidth]{img/gw_return_svg-tex}
-%      \label{sub:gridworld}
-%      \includegraphics[width=0.5\textwidth]{img/gw_stoch_return_svg-tex}
-%      \label{sub:gridworld_stoch}
-
 \subfloat{
-	\includegraphics[width=0.33\textwidth]{img/hw_return_svg-tex}
+	\includegraphics[width=\textwidth]{img/hw_return_svg-tex}
 	\label{sub:highway}
 }
+\newline
 \subfloat{
-	\includegraphics[width=0.33\textwidth]{img/gw_return_svg-tex}
+	\includegraphics[width=0.49\textwidth]{img/gw_return_svg-tex}
 	\label{sub:gridworld}
 }
 \subfloat{
-	\includegraphics[width=0.33\textwidth]{img/gw_stoch_return_svg-tex}
+	\includegraphics[width=0.49\textwidth]{img/gw_stoch_return_svg-tex}
 	\label{sub:gridworld_stoch}
 }
     \caption{Numerical experiments: for each environment-agent configuration, we compute the average return over 100 runs –- along with its 95\% confidence interval –- with respect to the available budget $n$.}
@@ -661,11 +654,11 @@ They are evaluated on the following tasks, using a discount factor of $\gamma=0.
 %\end{minipage}
 \end{figure}
 
-\begin{figure}[pht]
+\begin{figure}[pth]
 	\centering
 	
-	\includegraphics[width=0.43\textwidth]{img/tree-ODP_svg-tex} \includegraphics[width=0.43\textwidth]{img/tree-OLOP_svg-tex}
-	\includegraphics[width=0.43\textwidth]{img/tree-KL-OLOP_svg-tex}
+	\includegraphics[width=0.64\textwidth]{img/tree-ODP_svg-tex} \includegraphics[width=0.64\textwidth]{img/tree-OLOP_svg-tex}
+	\includegraphics[width=0.64\textwidth]{img/tree-KL-OLOP_svg-tex}
 	
 	\caption{The look-ahead trees (down to depth 6) expanded by the planning algorithms from the same initial state in the highway environment with the same budget $n=10^3$. The width of edges represents the nodes visit count $T_a(M)$.}
 	\label{fig:trees}
