@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 # import seaborn as sns
 # sns.set()
-from rl_agents.utils import bernoulli_kullback_leibler
+from rl_agents.math_utils import bernoulli_kullback_leibler
 
 vkl = lambda p, q: p * np.log(p/q) + (1 - p)*np.log((1-p)/(1-q))
 kl = bernoulli_kullback_leibler

@@ -12,8 +12,6 @@
 \newcommand{\ODP}{\texttt{ODP}\xspace}
 \newcommand{\KLOLOP}{\texttt{KL-OLOP}\xspace}
 \newcommand{\klOLOP}{\texttt{kl-OLOP}\xspace}
-\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
-\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -31,7 +29,7 @@
 
 \newcommand*{\MyDef}{\mathrm{\tiny def}}
 \newcommand*{\eqdefU}{\ensuremath{\mathop{\overset{\MyDef}{=}}}}% Unscaled version
-\newcommand*{\eqdef}{\mathop{\overset{\MyDef}{\resizebox{\widthof{\eqdefU}}{\heightof{=}}{=}}}}
+%\newcommand*{\eqdef}{\mathop{\overset{\MyDef}{\resizebox{\widthof{\eqdefU}}{\heightof{=}}{=}}}}
 
 
 \def\:#1{\protect \ifmmode {\mathbf{#1}} \else {\textbf{#1}} \fi}
@@ -141,6 +139,7 @@
 \DeclareMathOperator*{\argmin}{arg\,min} 
 \DeclareMathOperator*{\argmax}{arg\,max} 
 \DeclareMathOperator*{\cupdot}{\mathbin{\mathaccent\cdot\cup}}
+\newcommand{\eqdef}{\buildrel \text{def}\over =}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Matrix operators         %
@@ -174,6 +173,7 @@
 % \newtheorem{theorem}{Theorem}
 % \newtheorem{definition}{Definition}
 % \newtheorem{lemma}{Lemma}
-% \newtheorem{proposition}{Proposition}
-% \newtheorem{remark}{Remark}
-% \newtheorem{property}{Property}
+\newtheorem{proposition}{Proposition}
+\newtheorem{assumption}{Assumption}
+\newtheorem{remark}{Remark}
+\newtheorem{property}{Property}
