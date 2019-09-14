@@ -7,10 +7,11 @@
 %\reserveinserts{28}
 
 \usepackage[backend=biber, citestyle=authoryear, maxcitenames=2, maxbibnames=20]{biblatex}
-\bibliography{biblio}
+\bibliography{../biblio.bib}
 
 \usepackage{amsmath,amssymb,amsthm,dsfont}
 \usepackage{amsfonts}
+\usepackage{mathtools}
 \usepackage{color}
 \usepackage{esint}
 \usepackage{stmaryrd}
@@ -73,6 +74,10 @@
 % Input
 \input{style}
 \input{../mathdef}
+\newtheorem{proposition}{Proposition}
+\newtheorem{assumption}{Assumption}
+\newtheorem{remark}{Remark}
+\newtheorem{property}{Property}
 
 % Style
 
@@ -98,23 +103,18 @@
 
 
 \author[shortname]{
-Edouard Leurent \inst{1},\inst{2}, \inst{3} \and 
-Odalric-Ambrym Maillard\inst{1} \and 
-Denis Efimov \inst{1} \and 
-Wilfrid Perruquetti \inst{2} \and 
-Yann Blanco \inst{3}}
+Edouard Leurent \inst{1}, \inst{2} \and 
+Odalric-Ambrym Maillard\inst{1}}
 \institute[shortinst]{\inst{1} Inria SequeL.\and %
-                      \inst{2} Inria VALSE. \and 
-                      \inst{3} Renault Group.}
+                      \inst{2} Renault Group.}
 
-\title[]{Safe Reinforcement Learning for Autonomous Driving.}
+\title[]{Practical Open-Loop Optimistic Planning}
 \date{}
 \begin{document}
 	
 \setbeamertemplate{background canvas}[vertical shading][top=bleu2,middle=bleu2,bottom=bleu1]
 \setbeamertemplate{footline}{\hspace{5em} \textcolor{white} {\null \hfill
-		\scriptsize Lille, April 2019}\hspace{2em}\null \vspace*{3pt}}
-	
+		\scriptsize Würzburg, September 2019}\hspace{2em}\null \vspace*{3pt}}
 	
 \begin{frame}
 \begin{textblock*}{40mm}[0,0](10mm,0mm)
@@ -124,39 +124,26 @@ Yann Blanco \inst{3}}
 	\includegraphics[width=2.6cm]{inria/renault_group}
 \end{textblock*}
 
-
-
-
 \begin{textblock*}{11.8cm}(4mm,40mm)
 	\vspace{.3cm}
 	\textcolor{white} {
-		\Large \textbf{\hspace{0.5em}Safe Reinforcement Learning for Decision-Making \\
-			\hspace{1.5em} in Autonomous Driving}\\
+		\Large \textbf{\hspace{0.5em}Practical Open-Loop Optimistic Planning}\\
 		{\small %
 			\vspace{1cm}
-			\hspace{1.5em}\large\textbf{Edouard Leurent, Odalric-Ambrym Maillard, Denis Efimov,}\\
-			\hspace{1.4em}\large\textbf{Wilfrid Perruquetti, Yann Blanco}\\
-			\hspace{2.5em}SequeL, Inria Lille -- Nord Europe\\
-			\hspace{2.5em}Valse, Inria Lille -- Nord Europe\\
-			\hspace{2.5em}Renault Group\\
+			\hspace{1.5em}\large\textbf{Edouard Leurent$^{1,2}$, Odalric-Ambrym Maillard$^1$}\\
+			\hspace{2.5em}${}^1$ SequeL, Inria Lille -- Nord Europe\\
+			\hspace{2.5em}${}^2$ Renault Group\\
 	}}
 \end{textblock*}
 
-%\begin{textblock*}{40mm}[0,0](10mm,76mm)
-%	\begin{picture}(5,80)
-%	\put(0,20){\includegraphics[width=3.8cm,height=1.5cm]{inria/logobasbleuV1}}
-%	\put(18,35){
-%		\hspace{0.3cm}\textcolor{bleu2}{CONF2019}
-%	}
-%	\put(18,30){
-%		\hspace{-0.07in}\begin{minipage}{30mm}
-%		\begin{spacing}{0.5}
-%		\textcolor{bleu2}{\scriptsize }
-%		\end{spacing}
-%		\end{minipage}
-%	}
-%	\end{picture}
-%\end{textblock*}
+\begin{textblock*}{40mm}[0,0](10mm,76mm)
+	\begin{picture}(5,80)
+	\put(0,20){\includegraphics[width=3.8cm,height=1.5cm]{inria/logobasbleuV1}}
+	\put(13,35){
+		\footnotesize \textcolor{bleu2}{ECML PKDD 2019}
+	}
+	\end{picture}
+\end{textblock*}
 
 \vspace*{-4pt}
 \end{frame}
@@ -170,30 +157,93 @@ Yann Blanco \inst{3}}
 		\includegraphics[width=14mm]{inria/logobastrans}
 		\hspace{.4cm}
 		\raisebox{3.2ex}
-		{\scriptsize Safe Reinforcement Learning for Autonomous Driving}\hfill
+		{\scriptsize Practical Open-Loop Optimistic Planning}\hfill
 		\raisebox{3.2ex}
-		{Lille - \insertframenumber/\inserttotalframenumber \hspace{5mm}
+		{Würzburg - \insertframenumber/\inserttotalframenumber \hspace{5mm}
 			\null }
 \end{beamercolorbox}
 }
 
-\begin{frame}{Motivation}
+\begin{frame}{Motivation | Sequential Decision Making}
 
+\begin{block}{Markov Decision Processes}
+\begin{enumerate}
+    \item Observe state $s\in S$;
+    \item Pick a \hlb{discrete} action $a\in A$;
+    \item Transition to a next state $s'\sim \hler{\probability{s'|s,a}}$;
+    \item Receive a \hlb{bounded} reward $r\in[0, 1]$ drawn from $\hler{\probability{r|s, a}}$.
+\end{enumerate}
+\begin{center}
+    Objective: maximise \hlg{V = $\expectedvalue \left[\sum_{t=0}^\infty \gamma^t r_t \right]$}
+\end{center}
+\end{block}
 
 \end{frame}
 
-\begin{frame}{Efficient Planning}
-    Look back at the performances of MCTS (actually \texttt{UCT})
+\begin{frame}{Motivation | How to solve MDPs?}
 
-    It is quite good, but clearly \hly{sub-optimal}.
+% \begin{block}{Dynamic Programming}
+% \begin{itemize}
+%     \item The transition and reward kernels $\probability{s',r|s,a}$ are \hlg{known};
+%     \item[\incarrow] The problem reduces to solving a \hlg{linear program}.
+% \end{itemize}
+% \end{block}
+
+\begin{exampleblock}{Online \emph{Planning}}
+\begin{itemize}
+    \item the transition kernel and reward kernel are \hlr{unknown}
+    \item we have access to a \hlg{generative model}: 
+    \begin{itemize}
+        \item[\incarrow] yields samples of $s', r \sim \probability{s',r|s,a}$ when queried
+    \end{itemize}
+    \item \hlr{fixed budget}: the model can only be queried $n$ times
+\end{itemize}
+\begin{center}
+Objective: \hlg{minimize} $\expectedvalue \underbrace{r_n = V^* - V(n)}_{\text{Simple Regret}}$
+\end{center}
+\end{exampleblock}
+\end{frame}
+
+
+\begin{frame}{Optimistic Planning}
     
-    \bigskip
-    Should we just increase the budget?
-    What are some failing cases?
+    
+    \begin{alertblock}{Previously: Combinatorial Search}
+    \begin{itemize}
+        \item Branch pruning and heuristic utility functions
+    \end{itemize}
+    \end{alertblock}
+    
+    \begin{exampleblock}{Optimism in the Face of Uncertainty}
+    Given a set of decisions $a\in A$ with uncertain outcomes $\nu_a$, pick the one with the \hlg{highest upper-confidence bound}.
+    
+    \begin{itemize}
+        \item Either you performed well;
+        \item or you learned something.
+    \end{itemize}
+    \end{exampleblock}
+    
+    
+    \begin{block}{Instances}
+    \begin{itemize}
+        \item Monte-carlo tree search [\cite{Coulom2006}]: for playing Go
+        \item Reframed in the bandit setting as \texttt{UCT} [\cite{Kocsis2006}]
+        \item Asymptotic analysis but no finite time guarantee.
+    \end{itemize}
+    \end{block}
+\end{frame}
+
+
+\begin{frame}{Failing cases of \texttt{UCT}}
+    It was analysed in [\cite{Coquelin2007}]
+    \begin{center}
+    \includegraphics[width=0.8\textwidth]{img/uct_fail}
+    \end{center}
+    The sample complexity of is lower-bounded by \hlr{$O(\exp(\exp(D)))$}.
 \end{frame}
 
 \begin{frame}{Failing cases of \texttt{UCT}}
-    a.k.a the \emph{mousehole} problem
+    Not just a theoretical counter-example.
     \begin{center}
     \includegraphics[width=0.8\textwidth]{img/uct_trap}\\
     \bigskip
@@ -201,124 +251,162 @@ Yann Blanco \inst{3}}
     \end{center}
 \end{frame}
 
-\begin{frame}{Failing cases of \texttt{UCT}}
-    It was analysed in [\cite{Coquelin2007}]
-    \begin{center}
-    \includegraphics[width=0.8\textwidth]{img/uct_fail}
-    \end{center}
-    The sample complexity of is lower-bounded by $O(\exp(\exp(D)))$.
-\end{frame}
-
-\begin{frame}{A Benchmark of Planning Algorithms}
-    \small
-    \begin{threeparttable}
-    \centering
-    \begin{tabular}{cccc}
-    \toprule
-        Algorithm & Complexity & Does it run? & Does it work?\\
-        \midrule
-        \texttt{MCTS} & ? & \hlg{YES} & ?\\
-        \texttt{SparseSampling}\tnote{1} & $(1/\epsilon)^{\log 1/\epsilon}$ & \hlg{YES} & \hlr{NO} \\
-        \texttt{UCT} & $\exp(\exp(D))$ & \hlg{YES} & \hly{KIND OF} \\
-        \texttt{OPD}\tnote{2} & $n^{-\frac{\log1/\gamma}{\log \kappa}}$ & \hlg{YES} & \hlg{YES} \\
-        \texttt{OLOP} & $n^{-\min(\frac{1}{2}, \frac{\log1/\gamma}{\log \kappa})}$ & \hly{KIND OF} & \hlr{NO} \\
-        \texttt{ST0P}\tnote{1} & $(1/\epsilon)^{2+\frac{\log \kappa'}{\log1/\gamma}+o(1)}$ & \hlr{NO} & ? (\hlr{NO})\\
-        \texttt{TrailBlazer}\tnote{1} & $(1/\epsilon)^{\frac{\log N\kappa}{\log1/\gamma}}(\log\frac{1}{\delta\epsilon})^\alpha$ & \hlg{YES} & \hlr{NO}\\
-        \texttt{PlatYPOOs}\tnote{2} & $\leq$ \texttt{OLOP} & \hlg{YES} & \hlg{YES}\\
-        \bottomrule
-    \end{tabular}
-    
-    \begin{tablenotes}
-    \item[1] In the PAC framework. 
-    \item[2] With deterministic dynamics
-    \end{tablenotes}
-    \end{threeparttable}
-\end{frame}
-
-\begin{frame}{Practical Open Loop Optimistic Planning}
-\begin{block}{The idea behind \texttt{OLOP}}
-\begin{center}
-\includesvg[width=0.6\textwidth]{../img/olop-explain}
-\end{center}
-\end{block}
-\begin{center}
-\scalebox{0.7}{
-\begin{algorithm}[H]
-\DontPrintSemicolon
-\footnotesize
-\For{each episode $m = 1, \cdots, M$}{
-Compute $U_a(m-1)$ from \eqref{eq:Ua} for all $a\in\mathcal{T}$\;
-Compute $B_a(m-1)$ from \eqref{eq:Ba} for all $a\in A^L$\;\label{alg:b_values_compute}
-Sample a sequence with highest B-value: $a^m \in \argmax_{a\in A^L} B_a(m-1)$.\;
-}
-\Return the most played sequence $a(n) \in \argmax_{a\in A^L} T_a(M)$
-\caption{General structure for Open-Loop Optimistic Planning}
-\label{algo:kl-olop}
-\end{algorithm}}
-\end{center}
-\end{frame}
-
-\begin{frame}{Practical Open Loop Optimistic Planning}
-\begin{block}{The idea behind \texttt{OLOP}}
-\begin{center}
-\includesvg[width=0.6\textwidth]{../img/olop-explain-2}
-\end{center}
-\end{block}
-\begin{center}
-\scalebox{0.7}{
-\begin{algorithm}[H]
-\DontPrintSemicolon
-\footnotesize
-\For{each episode $m = 1, \cdots, M$}{
-Compute $U_a(m-1)$ from \eqref{eq:Ua} for all $a\in\mathcal{T}$\;
-Compute $B_a(m-1)$ from \eqref{eq:Ba} for all $a\in A^L$\;
-Sample a sequence with highest B-value: $a^m \in \argmax_{a\in A^L} B_a(m-1)$.\;
-}
-\Return the most played sequence $a(n) \in \argmax_{a\in A^L} T_a(M)$
-\caption{General structure for Open-Loop Optimistic Planning}
-\end{algorithm}}
-\end{center}
-\end{frame}
-
-\begin{frame}{Practical Open Loop Optimistic Planning}
-    \begin{block}{What's wrong with \texttt{OLOP}? }
-    Overly pessimistic, especially in the low-budget regime.
+\begin{frame}{Can we get better guarantees?}
+    \begin{block}{\OPD: Optimistic Planning for Deterministic systems}
+    \begin{itemize}
+        \item Introduced by [\cite{Hren2008}]
+        \item Another \hlg{optimistic} algorithm
+        \item Only for \hlr{deterministic} MDPs
+    \end{itemize}
     \end{block}
-    \begin{equation}
-         U^{\mu}_a(m) = \hat{\mu}_a(m) + \sqrt{\frac{2 \log M}{T_a(m)}}
-    \end{equation}
-    \begin{equation}
+    \begin{theorem}[\OPD sample complexity]
+    \begin{equation*}
+    \expectedvalue r_n = 
+      \cO\left(n^{-\frac{\log 1/\gamma}{\log \kappa}}\right), \text{if}\ \kappa > 1 
+    \end{equation*}
+    \end{theorem}
+\begin{block}{\OLOP: Open-Loop Optimistic Planning}
+    \begin{itemize}
+        \item Introduced by [\cite{Bubeck2010}]
+        \item Extends \OPD to the \hlg{stochastic} setting
+        \item Only considers \hlr{open-loop} policies, i.e. sequences of actions
+    \end{itemize}
+    \end{block}
+\end{frame}
+
+% \begin{frame}{A Benchmark of Planning Algorithms}
+%     \small
+%     \begin{threeparttable}
+%     \centering
+%     \begin{tabular}{cccc}
+%     \toprule
+%         Algorithm & Complexity & Does it run? & Does it work?\\
+%         \midrule
+%         \texttt{MCTS} & ? & \hlg{YES} & ?\\
+%         \texttt{SparseSampling}\tnote{1} & $(1/\epsilon)^{\log 1/\epsilon}$ & \hlg{YES} & \hlr{NO} \\
+%         \texttt{UCT} & $\exp(\exp(D))$ & \hlg{YES} & \hly{KIND OF} \\
+%         \texttt{OPD}\tnote{2} & $n^{-\frac{\log1/\gamma}{\log \kappa}}$ & \hlg{YES} & \hlg{YES} \\
+%         \OLOP & $n^{-\min(\frac{1}{2}, \frac{\log1/\gamma}{\log \kappa})}$ & \hly{KIND OF} & \hlr{NO} \\
+%         \texttt{ST0P}\tnote{1} & $(1/\epsilon)^{2+\frac{\log \kappa'}{\log1/\gamma}+o(1)}$ & \hlr{NO} & ? (\hlr{NO})\\
+%         \texttt{TrailBlazer}\tnote{1} & $(1/\epsilon)^{\frac{\log N\kappa}{\log1/\gamma}}(\log\frac{1}{\delta\epsilon})^\alpha$ & \hlg{YES} & \hlr{NO}\\
+%         \texttt{PlatYPOOs}\tnote{2} & $\leq$ \OLOP & \hlg{YES} & \hlg{YES}\\
+%         \bottomrule
+%     \end{tabular}
+    
+%     \begin{tablenotes}
+%     \item[1] In the PAC framework. 
+%     \item[2] With deterministic dynamics
+%     \end{tablenotes}
+%     \end{threeparttable}
+% \end{frame}
+
+\begin{frame}{The idea behind \OLOP}
+\begin{center}
+\includesvg[width=0.8\textwidth]{img/olop-explain}
+\end{center}
+% \begin{center}
+% \scalebox{0.7}{
+% \begin{algorithm}[H]
+% \DontPrintSemicolon
+% \footnotesize
+% \For{each episode $m = 1, \cdots, M$}{
+% Compute $U_a(m-1)$ from \eqref{eq:Ua} for all $a\in\mathcal{T}$\;
+% Compute $B_a(m-1)$ from \eqref{eq:Ba} for all $a\in A^L$\;\label{alg:b_values_compute}
+% Sample a sequence with highest B-value: $a^m \in \argmax_{a\in A^L} B_a(m-1)$.\;
+% }
+% \Return the most played sequence $a(n) \in \argmax_{a\in A^L} T_a(M)$
+% \caption{General structure for Open-Loop Optimistic Planning}
+% \label{algo:kl-olop}
+% \end{algorithm}}
+% \end{center}
+\end{frame}
+
+\begin{frame}{The idea behind \OLOP}
+\begin{center}
+\includesvg[width=0.8\textwidth]{img/olop-explain-2}
+\end{center}
+% \begin{center}
+% \scalebox{0.7}{
+% \begin{algorithm}[H]
+% \DontPrintSemicolon
+% \footnotesize
+% \For{each episode $m = 1, \cdots, M$}{
+% Compute $U_a(m-1)$ from \eqref{eq:Ua} for all $a\in\mathcal{T}$\;
+% Compute $B_a(m-1)$ from \eqref{eq:Ba} for all $a\in A^L$\;
+% Sample a sequence with highest B-value: $a^m \in \argmax_{a\in A^L} B_a(m-1)$.\;
+% }
+% \Return the most played sequence $a(n) \in \argmax_{a\in A^L} T_a(M)$
+% \caption{General structure for Open-Loop Optimistic Planning}
+% \end{algorithm}}
+% \end{center}
+\end{frame}
+
+\begin{frame}{Under the hood}
+\begin{block}{\OLOP main tool: the Chernoff-Hoeffding deviation inequality}
+    \begin{equation*}
+         \underbrace{U^{\mu}_a(m)}_{\text{Upper bound}} \eqdef \underbrace{\hat{\mu}_a(m)}_{\text{Empirical mean}} + \underbrace{\sqrt{\frac{2 \log M}{T_a(m)}}}_{\text{Confidence interval}}
+    \end{equation*}
+\end{block}
+    \begin{block}{\OPD: upper-bound all the future rewards by 1}
+    \begin{equation*}
     \label{eq:Ua}
-        U_a(m) \eqdef \sum_{t=1}^h \gamma^t U^{\mu}_{a_{1:t}}(m) + \frac{\gamma^{h+1}}{1-\gamma}
-    \end{equation}
-    \begin{equation}
+        U_a(m) \eqdef \sum_{t=1}^h \underbrace{\gamma^t U^{\mu}_{a_{1:t}}(m)}_{\text{Past rewards}} + \underbrace{\frac{\gamma^{h+1}}{1-\gamma}}_{\text{Future rewards}}
+    \end{equation*}
+    \end{block}
+    
+    \begin{block}{\emph{Bounds sharpening}}
+    \begin{equation*}
     \label{eq:Ba}
         B_a(m) \eqdef \inf_{1 \leq t \leq L} U_{a_{1:t}}(m)
-    \end{equation}
-    Intuitive explanation: 
+    \end{equation*}
+    \end{block}
+\end{frame}
+
+\begin{frame}{Does it work?}
+\includesvg[width=\textwidth]{img/hw_return_olop_fail}
+\end{frame}
+
+\begin{frame}{What's wrong with \OLOP?}
+    Overly optimistic, especially in the low-budget regime.
+
+    \begin{alertblock}{Intuitive explanation}
     \begin{itemize}
         \item Unintended behaviour happens when $\hler{U^{\mu}_a(m) > 1}, \forall a$. 
         \item Then the sequence $(U_{a_{1:t}}(m))_t$ is non-decreasing
         \item Then \hlr{$B_a(m) = U_{a_{1:1}}(m)$}
     \end{itemize}
+    \end{alertblock}
+    
+    Recall:
+    \begin{equation*}
+         U^{\mu}_a(m) = \hat{\mu}_a(m) + \sqrt{\frac{2 \log M}{T_a(m)}}
+    \end{equation*}
+    \begin{equation*}
+    \label{eq:Ua}
+        U_a(m) = \sum_{t=1}^h \gamma^t U^{\mu}_{a_{1:t}}(m) + \frac{\gamma^{h+1}}{1-\gamma}
+    \end{equation*}
+    \begin{equation*}
+    \label{eq:Ba}
+        B_a(m) = \inf_{1 \leq t \leq L} U_{a_{1:t}}(m)
+    \end{equation*}
 \end{frame}
 
-\begin{frame}{Practical Open Loop Optimistic Planning}
+\begin{frame}{Open Loop Optimistic Planning}
 \begin{block}{What we were promised}
 \begin{center}
-\includesvg[width=0.8\textwidth]{../img/olop-explain-2}
+\includesvg[width=0.8\textwidth]{img/olop-explain-2}
 \end{center}
 \end{block}
 \end{frame}
 
-\begin{frame}{Practical Open Loop Optimistic Planning}
-\begin{block}{What we actually got}
+\begin{frame}{Open Loop Optimistic Planning}
+\begin{block}{What we actually get}
 \begin{center}
-\includesvg[width=0.8\textwidth]{../img/olop-explain-3}
+\includesvg[width=0.8\textwidth]{img/olop-explain-3}
 \end{center}
 \end{block}
 \begin{flushright}
-\texttt{OLOP} behaves as \hlr{uniform planning}!
+\OLOP behaves as \hlr{uniform planning}!
 \end{flushright}
 \end{frame}
 
@@ -331,7 +419,7 @@ Sample a sequence with highest B-value: $a^m \in \argmax_{a\in A^L} B_a(m-1)$.\;
     \begin{center}
     \begin{tabular}{ccc}
     \toprule
-        Algorithm & \texttt{OLOP} & \texttt{KL-OLOP} \\
+        Algorithm & \OLOP & \KLOLOP \\
         \midrule
         Interval $I$ & $\mathbb{R}$ & [0, 1] \\
         Divergence $d$ & $d_{\texttt{QUAD}}$ & $d_{\texttt{BER}}$ \\
@@ -363,38 +451,36 @@ Conversely,
 
 \begin{frame}{Sample complexity}
 
-\texttt{KL-OLOP} introduced and analysed in [\cite{Leurent2019c}].
-
-    \begin{theorem}[Sample complexity]
+\begin{theorem}[Sample complexity]
 \label{thm:regret}
-\texttt{KL-OLOP} enjoys the same asymptotic regret bounds as \texttt{OLOP}. More precisely, \texttt{KL-OLOP} satisfies:
+\KLOLOP enjoys the same regret bounds as \OLOP. More precisely, \KLOLOP satisfies:
 \begin{equation*}
     \expectedvalue r_n = \begin{cases}
-      \tilde{0}\left(n^{-\frac{\log 1/\gamma}{\log \kappa'}}\right), & \text{if}\ \gamma\sqrt{\kappa'} > 1 \\
-      \tilde{0}\left(n^{-\frac{1}{2}}\right), & \text{if}\ \gamma\sqrt{\kappa'} \leq 1
+      \tilde{\cO}\left(n^{-\frac{\log 1/\gamma}{\log \kappa'}}\right), & \text{if}\ \gamma\sqrt{\kappa'} > 1 \\
+      \tilde{\cO}\left(n^{-\frac{1}{2}}\right), & \text{if}\ \gamma\sqrt{\kappa'} \leq 1
     \end{cases}
 \end{equation*}
 \end{theorem}
 \end{frame}
 
 \begin{frame}{Time complexity}
-\begin{block}{Original \texttt{KL-OLOP}}
+\begin{block}{Original \KLOLOP}
 \emph{Compute $B_a(m-1)$ from \eqref{eq:Ba} \hlr{for all $a\in A^L$}}
 \end{block}
-\begin{block}{Lazy \texttt{KL-OLOP}}
+\begin{block}{Lazy \KLOLOP}
 \centering
 \includesvg[width=0.6\textwidth]{../img/tree.svg}
 \end{block}
 
 \begin{property}[Time and memory complexity]
 \begin{equation*}
-    \frac{C(\texttt{Lazy KL-OLOP})}{C(\texttt{KL-OLOP})} = \frac{\hleg{nK}}{\hler{K^{L}}}
+    \frac{C(\texttt{Lazy KL-OLOP})}{C(\KLOLOP)} = \frac{\hleg{nK}}{\hler{K^{L}}}
 \end{equation*}
 \end{property}
 \end{frame}
 
 \begin{frame}{Experiments | Expanded Trees}
-    \includesvg[width=\textwidth]{../img/tree_ODP}
+    \includesvg[width=\textwidth]{../img/tree_OPD}
 \end{frame}
 
 \begin{frame}{Experiments | Expanded Trees}
@@ -406,7 +492,7 @@ Conversely,
 \end{frame}
 
 \begin{frame}{Experiments | Highway}
-    \includesvg[width=\textwidth]{../img/hw_total_reward}
+    \includesvg[width=\textwidth]{../img/hw_return}
 \end{frame}
 \begin{frame}{Experiments | Gridworld}
     \includesvg[width=\textwidth]{../img/gw_return}
@@ -415,7 +501,7 @@ Conversely,
     \includesvg[width=\textwidth]{../img/gw_stoch_return}
 \end{frame}
 
-\begin{frame}[allowframebreaks]
+\begin{frame}
         \frametitle{References}
         \printbibliography
 \end{frame}
