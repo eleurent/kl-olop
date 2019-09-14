@@ -66,7 +66,7 @@
 \usepackage{lipsum}
 \usepackage{svg}
 
-\bibliography{../references.bib}
+\bibliography{../biblio.bib}
 
 \input{style}
 \input{../mathdef}
@@ -140,6 +140,7 @@ We consider the optimal control of an MDP $\cM = (\cS, A, R, T, \gamma)$ with bo
     \item[\incarrow] Access to a \hlb{generative model} $s' \sim \probability{s'|s,a}$ and $r\sim\probability{r|s, a}$
     \item[\incarrow] \hlr{Fixed-budget} setting: the generative model is \hlr{costly}, can only be queried $n$ times
 \end{itemize}
+\texttt{UCT}: \hlr{doubly-exponential} $\xrightarrow{}$ \OPD: \hlg{polynomial}, \hlr{deterministic}
 }
 
 %----------------------------------------------------------------------------------------
@@ -155,11 +156,11 @@ We consider the optimal control of an MDP $\cM = (\cS, A, R, T, \gamma)$ with bo
 \begin{enumerate}
     \item Sample $M$ sequences of actions of fixed length $L$
     \begin{center}
-\includesvg[width=0.8\textwidth]{img/olop-explain.svg}
+\includesvg[width=0.75\textwidth]{img/olop-explain.svg}
 \end{center}
     \item Use the \hlb{return structure} to \hlb{generalise} to unseen sequences
     \begin{center}
-\includesvg[width=0.8\textwidth]{img/olop-explain-2.svg}
+\includesvg[width=0.75\textwidth]{img/olop-explain-2.svg}
 \end{center}
 \item Be \hlb{Optimistic in the Face of Uncertainty}\\
     \incarrow~ in \hlr{observed} and \hlr{future} rewards
@@ -189,28 +190,28 @@ Sample a sequence with highest B-value: $a^m \in \argmax_{a\in A^L} B_a(m-1)$.\;
 {name=tools,column=0,below=setting,span =1}
 {
 
-\hlr{Overly pessimistic}, especially in the low-budget regime.
+\hlr{Overly optimistic}, especially in the low-budget regime.
 
-\begin{equation}
-         U^{\mu}_a(m) = \hat{\mu}_a(m) + \sqrt{\frac{2 \log M}{T_a(m)}}
+    \begin{equation}
+         \underbrace{U^{\mu}_a(m)}_{\text{Upper bound}} \eqdef \underbrace{\hat{\mu}_a(m)}_{\text{Empirical mean}} + \underbrace{\sqrt{\frac{2 \log M}{T_a(m)}}}_{\text{Confidence interval}}
     \end{equation}
     \begin{equation}
     \label{eq:Ua}
-        U_a(m) \eqdef \sum_{t = 1}^h \gamma^t U^{\mu}_{a_{1:t}}(m) + \frac{\gamma^{h+1}}{1-\gamma}
+        U_a(m) \eqdef \sum_{t=1}^h \underbrace{\gamma^t U^{\mu}_{a_{1:t}}(m)}_{\text{Past rewards}} + \underbrace{\frac{\gamma^{h+1}}{1-\gamma}}_{\text{Future rewards}}
     \end{equation}
     \begin{equation}
     \label{eq:Ba}
         B_a(m) \eqdef \inf_{1 \leq t \leq L} U_{a_{1:t}}(m)
     \end{equation}
     Intuitive explanation: 
-    \begin{itemize}
+    \begin{itemize}[noitemsep]
         \item Unintended behaviour happens when $\hler{U^{\mu}_a(m) > 1}, \forall a$. 
         \item Then the sequence $(U_{a_{1:t}}(m))_t$ is non-decreasing
         \item Then \hlr{$B_a(m) = U_{a_{1:1}}(m)$}
     \end{itemize}
 
 \begin{center}
-\includesvg[width=0.8\textwidth]{img/olop-explain-3.svg}    
+\includesvg[width=0.75\textwidth]{img/olop-explain-3.svg}    
 \end{center}
 
 \begin{center}
@@ -346,8 +347,8 @@ Let $\Tau_m^+ = \Tau_{m-1}^+$ and $\LL_m^+ = \LL_{m-1}^+$\;
          \textbf{Average return} over 100 runs –- along with its 95\% confidence interval –- with respect to the available budget $n$
      \end{center}
 
-    \includesvg[width=0.33\textwidth]{../img/tree-ODP}    \includesvg[width=0.33\textwidth]{../img/tree-OLOP}
-    \includesvg[width=0.33\textwidth]{../img/tree-KL-OLOP}
+    \includesvg[width=0.33\textwidth]{../img/tree_OPD}    \includesvg[width=0.33\textwidth]{../img/tree_OLOP}
+    \includesvg[width=0.33\textwidth]{../img/tree_KL-OLOP}
     \begin{center}
         \textbf{Expanded trees} for a budget $n=10^3$
     \end{center}
