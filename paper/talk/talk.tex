@@ -48,6 +48,7 @@
 \usetikzlibrary{calc,fadings,mindmap,trees,arrows,calc,tikzmark,shapes}
 \usepackage[flushleft]{threeparttable}
 
+
 \TPshowboxesfalse
 \textblockorigin{0mm}{0mm}
 \newcommand{\mathcolorbox}[2]{\colorbox{#1}{$\displaystyle #2$}}
@@ -165,6 +166,9 @@ Odalric-Ambrym Maillard\inst{1}}
 }
 
 \begin{frame}{Motivation | Sequential Decision Making}
+\begin{center}
+    \includegraphics[trim=0 275 0 25,clip, width=0.75\linewidth]{img/diagram1.pdf}
+\end{center}
 
 \begin{block}{Markov Decision Processes}
 \begin{enumerate}
@@ -177,18 +181,37 @@ Odalric-Ambrym Maillard\inst{1}}
     Objective: maximise \hlg{V = $\expectedvalue \left[\sum_{t=0}^\infty \gamma^t r_t \right]$}
 \end{center}
 \end{block}
+\end{frame}
 
+
+\begin{frame}{Motivation | Example}
+  \begin{tikzpicture}[remember picture,overlay]
+     \node[anchor=south west, inner sep=0pt] at (current page.south west) {%
+       \movie[height = \paperheight, width = \paperwidth, poster, showcontrols] {}{img/highway.mp4}%
+     };
+  \end{tikzpicture}
 \end{frame}
 
 \begin{frame}{Motivation | How to solve MDPs?}
+\begin{exampleblock}{Online \emph{Planning}}
+\begin{itemize}
+    \item we have access to a \hlg{generative model}: 
+    \begin{itemize}
+        \item[\incarrow] yields samples of $s', r \sim \probability{s',r|s,a}$ when queried
+    \end{itemize}
+\end{itemize}
+\begin{center}
+    \includegraphics<1>[trim=0 25 0 50,clip, width=0.7\linewidth]{img/diagram2.pdf}
+    \includegraphics<2>[trim=0 25 0 50,clip, width=0.7\linewidth]{img/diagram3.pdf}
+    \includegraphics<3>[trim=0 25 0 50,clip, width=0.7\linewidth]{img/diagram4.pdf}
+    \includegraphics<4>[trim=0 25 0 50,clip, width=0.7\linewidth]{img/diagram5.pdf}
+    \includegraphics<5>[trim=0 25 0 50,clip, width=0.7\linewidth]{img/diagram6.pdf}
+    \includegraphics<6>[trim=0 25 0 50,clip, width=0.7\linewidth]{img/diagram7.pdf}
+\end{center}
+\end{exampleblock}
+\end{frame}
 
-% \begin{block}{Dynamic Programming}
-% \begin{itemize}
-%     \item The transition and reward kernels $\probability{s',r|s,a}$ are \hlg{known};
-%     \item[\incarrow] The problem reduces to solving a \hlg{linear program}.
-% \end{itemize}
-% \end{block}
-
+\begin{frame}{Motivation | How to solve MDPs?}
 \begin{exampleblock}{Online \emph{Planning}}
 \begin{itemize}
     \item the transition kernel and reward kernel are \hlr{unknown}
@@ -206,29 +229,25 @@ Objective: \hlg{minimize} $\expectedvalue \underbrace{r_n = V^* - V(n)}_{\text{S
 
 
 \begin{frame}{Optimistic Planning}
-    
-    
-    \begin{alertblock}{Previously: Combinatorial Search}
-    \begin{itemize}
-        \item Branch pruning and heuristic utility functions
-    \end{itemize}
-    \end{alertblock}
+    % \begin{alertblock}{Previously: Combinatorial Search}
+    % \begin{itemize}
+    %     \item Branch pruning and heuristic utility functions
+    % \end{itemize}
+    % \end{alertblock}
     
     \begin{exampleblock}{Optimism in the Face of Uncertainty}
-    Given a set of decisions $a\in A$ with uncertain outcomes $\nu_a$, pick the one with the \hlg{highest upper-confidence bound}.
+    Given a set of decisions $a\in A$ with uncertain outcomes $\nu_a$, pick the one with the \hlg{highest upper-confidence bound}.\pause
     
     \begin{itemize}
-        \item Either you performed well;
-        \item or you learned something.
+        \item Either you performed well;\pause
+        \item or you learned something.\pause
     \end{itemize}
     \end{exampleblock}
-    
     
     \begin{block}{Instances}
     \begin{itemize}
         \item Monte-carlo tree search [\cite{Coulom2006}]: for playing Go
-        \item Reframed in the bandit setting as \texttt{UCT} [\cite{Kocsis2006}]
-        \item Asymptotic analysis but no finite time guarantee.
+        \item Reframed in the bandit setting as \texttt{UCT} [\cite{Kocsis2006}], with an asymptotic analysis but no finite time guarantee.
     \end{itemize}
     \end{block}
 \end{frame}
@@ -265,6 +284,7 @@ Objective: \hlg{minimize} $\expectedvalue \underbrace{r_n = V^* - V(n)}_{\text{S
       \cO\left(n^{-\frac{\log 1/\gamma}{\log \kappa}}\right), \text{if}\ \kappa > 1 
     \end{equation*}
     \end{theorem}
+    \pause
 \begin{block}{\OLOP: Open-Loop Optimistic Planning}
     \begin{itemize}
         \item Introduced by [\cite{Bubeck2010}]
@@ -342,17 +362,20 @@ Objective: \hlg{minimize} $\expectedvalue \underbrace{r_n = V^* - V(n)}_{\text{S
 \end{frame}
 
 \begin{frame}{Under the hood}
-\begin{block}{\OLOP main tool: the Chernoff-Hoeffding deviation inequality}
-    \begin{equation*}
-         \underbrace{U^{\mu}_a(m)}_{\text{Upper bound}} \eqdef \underbrace{\hat{\mu}_a(m)}_{\text{Empirical mean}} + \underbrace{\sqrt{\frac{2 \log M}{T_a(m)}}}_{\text{Confidence interval}}
-    \end{equation*}
-\end{block}
+    \begin{block}{\OLOP main tool: the Chernoff-Hoeffding deviation inequality}
+        \begin{equation*}
+             \underbrace{U^{\mu}_a(m)}_{\text{Upper bound}} \eqdef \underbrace{\hat{\mu}_a(m)}_{\text{Empirical mean}} + \underbrace{\sqrt{\frac{2 \log M}{T_a(m)}}}_{\text{Confidence interval}}
+        \end{equation*}
+    \end{block}
+    \pause
+    
     \begin{block}{\OPD: upper-bound all the future rewards by 1}
     \begin{equation*}
     \label{eq:Ua}
         U_a(m) \eqdef \sum_{t=1}^h \underbrace{\gamma^t U^{\mu}_{a_{1:t}}(m)}_{\text{Past rewards}} + \underbrace{\frac{\gamma^{h+1}}{1-\gamma}}_{\text{Future rewards}}
     \end{equation*}
     \end{block}
+    \pause
     
     \begin{block}{\emph{Bounds sharpening}}
     \begin{equation*}
@@ -363,7 +386,10 @@ Objective: \hlg{minimize} $\expectedvalue \underbrace{r_n = V^* - V(n)}_{\text{S
 \end{frame}
 
 \begin{frame}{Does it work?}
-\includesvg[width=\textwidth]{img/hw_return_olop_fail}
+\begin{center}
+    \includesvg[width=0.8\textwidth]{img/hw_return_olop_fail}
+    Our objective: \hlb{understand} and \hlg{bridge} this gap.
+\end{center}
 \end{frame}
 
 \begin{frame}{What's wrong with \OLOP?}
@@ -371,24 +397,21 @@ Objective: \hlg{minimize} $\expectedvalue \underbrace{r_n = V^* - V(n)}_{\text{S
 
     \begin{alertblock}{Intuitive explanation}
     \begin{itemize}
-        \item Unintended behaviour happens when $\hler{U^{\mu}_a(m) > 1}, \forall a$. 
+        \item Unintended behaviour happens when $\hler{U^{\mu}_a(m) > 1}, \forall a$.
+    \begin{equation*}
+         U^{\mu}_a(m) = \underbrace{\hat{\mu}_a(m)}_{\in [0,1]} + \underbrace{\sqrt{\frac{2 \log M}{T_a(m)}}}_{> 0}
+    \end{equation*}
         \item Then the sequence $(U_{a_{1:t}}(m))_t$ is non-decreasing
+    \begin{equation*}
+    U_a(m) = \sum_{t=1}^h \gamma^t U^{\mu}_{a_{1:t}}(m) + \frac{\gamma^{h+1}}{1-\gamma}
+    \end{equation*}
         \item Then \hlr{$B_a(m) = U_{a_{1:1}}(m)$}
+    \begin{equation*}
+    B_a(m) = \inf_{1 \leq t \leq L} U_{a_{1:t}}(m)
+    \end{equation*}
     \end{itemize}
     \end{alertblock}
     
-    Recall:
-    \begin{equation*}
-         U^{\mu}_a(m) = \hat{\mu}_a(m) + \sqrt{\frac{2 \log M}{T_a(m)}}
-    \end{equation*}
-    \begin{equation*}
-    \label{eq:Ua}
-        U_a(m) = \sum_{t=1}^h \gamma^t U^{\mu}_{a_{1:t}}(m) + \frac{\gamma^{h+1}}{1-\gamma}
-    \end{equation*}
-    \begin{equation*}
-    \label{eq:Ba}
-        B_a(m) = \inf_{1 \leq t \leq L} U_{a_{1:t}}(m)
-    \end{equation*}
 \end{frame}
 
 \begin{frame}{Open Loop Optimistic Planning}
@@ -410,7 +433,7 @@ Objective: \hlg{minimize} $\expectedvalue \underbrace{r_n = V^* - V(n)}_{\text{S
 \end{flushright}
 \end{frame}
 
-\begin{frame}{Kullback-Leibler Open Loop Optimistic Planning}
+\begin{frame}{Our contribution: Kullback-Leibler \OLOP}
     We summon the upper-confidence bound from \texttt{kl-UCB} [\cite{Cappe2013}]:
     \begin{equation*}
         U^{\mu}_a(m) \eqdef \max \left\{q\in I: T_a(m) d(\hat{\mu}_a(m), q) \leq f(m) \right\}
@@ -435,7 +458,7 @@ Objective: \hlg{minimize} $\expectedvalue \underbrace{r_n = V^* - V(n)}_{\text{S
     
 \end{frame}
 
-\begin{frame}{Kullback-Leibler Open Loop Optimistic Planning}
+\begin{frame}{Our contribution: Kullback-Leibler \OLOP}
 \begin{center}
 \vspace{-2em}
     \includegraphics[width=0.6\textwidth]{../img/ukl}
