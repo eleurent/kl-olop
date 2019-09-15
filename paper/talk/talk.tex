@@ -186,10 +186,10 @@ Odalric-Ambrym Maillard\inst{1}}
 
 \begin{frame}{Motivation | Example}
 \begin{block}{The \texttt{highway-env} environment \href{https://github.com/eleurent/highway-env}{\vcenteredinclude{img/github}{0.04}}}
-\end{block}
 \begin{center}
-    \includegraphics[width=\linewidth]{img/highway-env}
+    \href{https://github.com/eleurent/highway-env}{\includegraphics[width=\linewidth]{img/highway-env}}
 \end{center}
+\end{block}
 \end{frame}
 
 \begin{frame}{Motivation | How to solve MDPs?}
@@ -214,7 +214,6 @@ Odalric-Ambrym Maillard\inst{1}}
 \begin{frame}{Motivation | How to solve MDPs?}
 \begin{exampleblock}{Online \emph{Planning}}
 \begin{itemize}
-    \item the transition kernel and reward kernel are \hlr{unknown}
     \item we have access to a \hlg{generative model}: 
     \begin{itemize}
         \item[\incarrow] yields samples of $s', r \sim \probability{s',r|s,a}$ when queried
@@ -222,8 +221,11 @@ Odalric-Ambrym Maillard\inst{1}}
     \item \hlr{fixed budget}: the model can only be queried $n$ times
 \end{itemize}
 \begin{center}
-Objective: \hlg{minimize} $\expectedvalue \underbrace{r_n = V^* - V(n)}_{\text{Simple Regret}}$
+Objective: minimize $\expectedvalue \underbrace{\hler{V^* - V(n)}}_{\text{Simple Regret }r_n}$
 \end{center}
+\begin{flushright}
+An \hlb{exploration-exploitation} problem.
+\end{flushright}
 \end{exampleblock}
 \end{frame}
 
@@ -246,8 +248,9 @@ Objective: \hlg{minimize} $\expectedvalue \underbrace{r_n = V^* - V(n)}_{\text{S
     
     \begin{block}{Instances}
     \begin{itemize}
-        \item Monte-carlo tree search [\cite{Coulom2006}]: for playing Go
-        \item Reframed in the bandit setting as \texttt{UCT} [\cite{Kocsis2006}], with an asymptotic analysis but no finite time guarantee.
+        \item Monte-carlo tree search (\texttt{MCTS}) [\cite{Coulom2006}]: \texttt{CrazyStone}
+        \item Reframed in the bandit setting as \texttt{UCT} [\cite{Kocsis2006}], still very popular (e.g. \texttt{Alpha Go}).
+        \item An asymptotic analysis but no finite time guarantee.
     \end{itemize}
     \end{block}
 \end{frame}
@@ -387,9 +390,12 @@ Objective: \hlg{minimize} $\expectedvalue \underbrace{r_n = V^* - V(n)}_{\text{S
 
 \begin{frame}{Does it work?}
 \begin{center}
-    \includesvg[width=0.8\textwidth]{img/hw_return_olop_fail}
+    \includesvg[width=0.7\textwidth]{img/hw_return_olop_fail} \\
     Our objective: \hlb{understand} and \hlg{bridge} this gap.
 \end{center}
+\begin{flushright}
+Make \OLOP \emph{practical}.
+\end{flushright}
 \end{frame}
 
 \begin{frame}{What's wrong with \OLOP?}
@@ -414,7 +420,7 @@ Objective: \hlg{minimize} $\expectedvalue \underbrace{r_n = V^* - V(n)}_{\text{S
     
 \end{frame}
 
-\begin{frame}{Open Loop Optimistic Planning}
+\begin{frame}{What's wrong with \OLOP?}
 \begin{block}{What we were promised}
 \begin{center}
 \includesvg[width=0.8\textwidth]{img/olop-explain-2}
@@ -422,15 +428,28 @@ Objective: \hlg{minimize} $\expectedvalue \underbrace{r_n = V^* - V(n)}_{\text{S
 \end{block}
 \end{frame}
 
-\begin{frame}{Open Loop Optimistic Planning}
-\begin{block}{What we actually get}
+\begin{frame}{What's wrong with \OLOP?}
+\begin{alertblock}{What we actually get}
 \begin{center}
 \includesvg[width=0.8\textwidth]{img/olop-explain-3}
 \end{center}
-\end{block}
+\end{alertblock}
 \begin{flushright}
 \OLOP behaves as \hlr{uniform planning}!
 \end{flushright}
+\end{frame}
+
+\begin{frame}{What's wrong with \OLOP?}
+    \begin{block}{How long does it last?}
+    \begin{itemize}
+        \item Recall: unintended behaviour happens when $\hler{U^{\mu}_a(m) > 1}, \forall a$.
+    \begin{equation*}
+         U^{\mu}_a(m) = \underbrace{\hat{\mu}_a(m)}_{\in [0,1]} + \underbrace{\sqrt{\frac{2 \log M}{T_a(m)}}}_{> 0}
+    \end{equation*}
+    \item[\incarrow] $U^{\mu}_a(m)$ decreases as $\cO\left(1/\sqrt{T_a(m)}\right)$
+    \item[\incarrow] The issue lasts longer where $\underbrace{\hat{\mu}_a(m) \simeq 1}_{\text{near-optimal regions}}$
+    \end{itemize}
+    \end{block}
 \end{frame}
 
 \begin{frame}{Our contribution: Kullback-Leibler \OLOP}
@@ -455,7 +474,6 @@ Objective: \hlg{minimize} $\expectedvalue \underbrace{r_n = V^* - V(n)}_{\text{S
     d_{\texttt{QUAD}}(p,q) &\eqdef 2(p-q)^2\\
     d_{\texttt{BER}}(p, q) &\eqdef p \log \frac{p}{q} + (1-p)\log\frac{1-p}{1-q}
     \end{align*}
-    
 \end{frame}
 
 \begin{frame}{Our contribution: Kullback-Leibler \OLOP}
