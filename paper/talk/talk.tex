@@ -404,17 +404,19 @@ Make \OLOP \emph{practical}.
     \begin{alertblock}{Intuitive explanation}
     \begin{itemize}
         \item Unintended behaviour happens when $\hler{U^{\mu}_a(m) > 1}, \forall a$.
-    \begin{equation*}
-         U^{\mu}_a(m) = \underbrace{\hat{\mu}_a(m)}_{\in [0,1]} + \underbrace{\sqrt{\frac{2 \log M}{T_a(m)}}}_{> 0}
-    \end{equation*}
+        \begin{equation*}
+             U^{\mu}_a(m) = \underbrace{\hat{\mu}_a(m)}_{\in [0,1]} + \underbrace{\sqrt{\frac{2 \log M}{T_a(m)}}}_{> 0}
+        \end{equation*}
+        \pause
         \item Then the sequence $(U_{a_{1:t}}(m))_t$ is non-decreasing
-    \begin{equation*}
-    U_a(m) = \sum_{t=1}^h \gamma^t U^{\mu}_{a_{1:t}}(m) + \frac{\gamma^{h+1}}{1-\gamma}
-    \end{equation*}
+        \begin{equation*}
+        U_a(m) = \sum_{t=1}^h \gamma^t U^{\mu}_{a_{1:t}}(m) + \frac{\gamma^{h+1}}{1-\gamma}
+        \end{equation*}
+        \pause
         \item Then \hlr{$B_a(m) = U_{a_{1:1}}(m)$}
-    \begin{equation*}
-    B_a(m) = \inf_{1 \leq t \leq L} U_{a_{1:t}}(m)
-    \end{equation*}
+        \begin{equation*}
+        B_a(m) = \inf_{1 \leq t \leq L} U_{a_{1:t}}(m)
+        \end{equation*}
     \end{itemize}
     \end{alertblock}
     
@@ -446,7 +448,9 @@ Make \OLOP \emph{practical}.
     \begin{equation*}
          U^{\mu}_a(m) = \underbrace{\hat{\mu}_a(m)}_{\in [0,1]} + \underbrace{\sqrt{\frac{2 \log M}{T_a(m)}}}_{> 0}
     \end{equation*}
+    \pause
     \item[\incarrow] $U^{\mu}_a(m)$ decreases as $\cO\left(1/\sqrt{T_a(m)}\right)$
+    \pause
     \item[\incarrow] The issue lasts longer where $\underbrace{\hat{\mu}_a(m) \simeq 1}_{\text{near-optimal regions}}$
     \end{itemize}
     \end{block}
@@ -457,7 +461,7 @@ Make \OLOP \emph{practical}.
     \begin{equation*}
         U^{\mu}_a(m) \eqdef \max \left\{q\in I: T_a(m) d(\hat{\mu}_a(m), q) \leq f(m) \right\}
     \end{equation*}
-    
+    \pause
     \begin{center}
     \begin{tabular}{ccc}
     \toprule
@@ -482,10 +486,11 @@ Make \OLOP \emph{practical}.
     \includegraphics[width=0.6\textwidth]{../img/ukl}
 \end{center}
 \vspace{-1em}
-Conversely,
+\pause
+And now,
 \begin{itemize}
-    \item \hlg{$U^{\mu}_a(m) \in I = [0, 1], \forall a$}. 
-    \item The sequence $(U_{a_{1:t}}(m))_t$ is \hlg{non-increasing}
+    \item \hlg{$U^{\mu}_a(m) \in I = [0, 1], \forall a$}. \pause 
+    \item The sequence $(U_{a_{1:t}}(m))_t$ is \hlg{non-increasing} \pause
     \item $B_a(m) = U_a(m)$, the \emph{bound sharpening} step is \hlb{superfluous}.
 \end{itemize}
 \end{frame}
