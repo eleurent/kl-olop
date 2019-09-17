@@ -15,11 +15,11 @@ We compare the trees expanded in the same root space of [highway-env](https://gi
 
 | |
 |:--:|
-| ![](paper/img/tree-ODP.svg) | 
+| ![](paper/img/tree_OPD.svg) | 
 | `OPD` is tailored for deterministic systems and exploits this structure to explore a sparse near-optimal subtree. |
-| ![](paper/img/tree-OLOP.svg) |
+| ![](paper/img/tree_OLOP.svg) |
 | `OLOP` behaves in the same way as uniform planning, and fails to identify the optimal trajectory. |
-| ![](paper/img/tree-KL-OLOP.svg) |
+| ![](paper/img/tree_KL-OLOP.svg) |
 | `KL-OLOP` explores a tree similar to that of `OPD` despite supporting the larger class of stochastic systems, and successfully returns the optimal trajectory. |
 
 ### Performances
