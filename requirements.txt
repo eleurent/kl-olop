@@ -1,0 +1,2 @@
+git+git://github.com/eleurent/highway-env@master#egg=highway-env
+git+git://github.com/eleurent/rl-agents@master#egg=rl-agents
