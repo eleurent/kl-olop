@@ -119,7 +119,7 @@ Odalric-Ambrym Maillard\inst{1}}
 	
 \begin{frame}
 \begin{textblock*}{40mm}[0,0](10mm,0mm)
-	\includegraphics[width=3.4cm]{inria/logobleu2}
+	\includegraphics[width=3.4cm]{inria/inria_tab}
 \end{textblock*}
 \begin{textblock*}{40mm}[0,0](14mm,3mm)
 	\includegraphics[width=2.6cm]{inria/renault_group}
@@ -139,7 +139,7 @@ Odalric-Ambrym Maillard\inst{1}}
 
 \begin{textblock*}{40mm}[0,0](10mm,76mm)
 	\begin{picture}(5,80)
-	\put(0,20){\includegraphics[width=3.8cm,height=1.5cm]{inria/logobasbleuV1}}
+	\put(0,20){\includegraphics[width=3.8cm,height=1.5cm]{inria/logobasVT}}
 	\put(13,35){
 		\footnotesize \textcolor{bleu2}{ECML PKDD 2019}
 	}
@@ -160,7 +160,7 @@ Odalric-Ambrym Maillard\inst{1}}
 		\raisebox{3.2ex}
 		{\scriptsize Practical Open-Loop Optimistic Planning}\hfill
 		\raisebox{3.2ex}
-		{Würzburg - \insertframenumber/\inserttotalframenumber \hspace{5mm}
+		{ECML PKDD 2019 - \insertframenumber/\inserttotalframenumber \hspace{5mm}
 			\null }
 \end{beamercolorbox}
 }
@@ -171,11 +171,12 @@ Odalric-Ambrym Maillard\inst{1}}
 \end{center}
 
 \begin{block}{Markov Decision Processes}
+\pause
 \begin{enumerate}
-    \item Observe state $s\in S$;
-    \item Pick a \hlb{discrete} action $a\in A$;
-    \item Transition to a next state $s'\sim \hler{\probability{s'|s,a}}$;
-    \item Receive a \hlb{bounded} reward $r\in[0, 1]$ drawn from $\hler{\probability{r|s, a}}$.
+    \item Observe state $s\in S$;\pause
+    \item Pick a \hlb{discrete} action $a\in A$;\pause
+    \item Transition to a next state $s'\sim \hler{\probability{s'|s,a}}$;\pause
+    \item Receive a \hlb{bounded} reward $r\in[0, 1]$ drawn from $\hler{\probability{r|s, a}}$.\pause
 \end{enumerate}
 \begin{center}
     Objective: maximise \hlg{V = $\expectedvalue \left[\sum_{t=0}^\infty \gamma^t r_t \right]$}
@@ -189,6 +190,7 @@ Odalric-Ambrym Maillard\inst{1}}
 \begin{center}
     \href{https://github.com/eleurent/highway-env}{\includegraphics[width=\linewidth]{img/highway-env}}
 \end{center}
+We want to handle stochasticity.
 \end{block}
 \end{frame}
 
@@ -214,10 +216,6 @@ Odalric-Ambrym Maillard\inst{1}}
 \begin{frame}{Motivation | How to solve MDPs?}
 \begin{exampleblock}{Online \emph{Planning}}
 \begin{itemize}
-    \item we have access to a \hlg{generative model}: 
-    \begin{itemize}
-        \item[\incarrow] yields samples of $s', r \sim \probability{s',r|s,a}$ when queried
-    \end{itemize}
     \item \hlr{fixed budget}: the model can only be queried $n$ times
 \end{itemize}
 \begin{center}
@@ -238,7 +236,7 @@ An \hlb{exploration-exploitation} problem.
     % \end{alertblock}
     
     \begin{exampleblock}{Optimism in the Face of Uncertainty}
-    Given a set of decisions $a\in A$ with uncertain outcomes $\nu_a$, pick the one with the \hlg{highest upper-confidence bound}.\pause
+    Given a set of options $a\in A$ with uncertain outcomes, try the one with the \hlg{highest possible outcome}.\pause
     
     \begin{itemize}
         \item Either you performed well;\pause
@@ -250,13 +248,13 @@ An \hlb{exploration-exploitation} problem.
     \begin{itemize}
         \item Monte-carlo tree search (\texttt{MCTS}) [\cite{Coulom2006}]: \texttt{CrazyStone}
         \item Reframed in the bandit setting as \texttt{UCT} [\cite{Kocsis2006}], still very popular (e.g. \texttt{Alpha Go}).
-        \item An asymptotic analysis but no finite time guarantee.
+        \item Proved \hlg{asymptotic consistency}, but \hlr{no regret bound}.
     \end{itemize}
     \end{block}
 \end{frame}
 
 
-\begin{frame}{Failing cases of \texttt{UCT}}
+\begin{frame}{Analysis of \texttt{UCT}}
     It was analysed in [\cite{Coquelin2007}]
     \begin{center}
     \includegraphics[width=0.8\textwidth]{img/uct_fail}
@@ -268,7 +266,7 @@ An \hlb{exploration-exploitation} problem.
     Not just a theoretical counter-example.
     \begin{center}
     \includegraphics<1>[width=0.8\textwidth]{img/uct_trap}
-    \includegraphics<2>[width=0.8\textwidth]{img/uct_trap_2}
+    %\includegraphics<2>[width=0.8\textwidth]{img/uct_trap_2}
     \\ \bigskip
     \includesvg[width=0.5\textwidth]{img/uct_fail_hw}
     \end{center}
@@ -324,45 +322,39 @@ An \hlb{exploration-exploitation} problem.
 %     \end{threeparttable}
 % \end{frame}
 
+
+\begin{frame}{The idea behind \OLOP}
+\begin{block}{A direct application of Optimism in the Face of Uncertainty}
+\begin{enumerate}
+    \item We want \[\max_a V(a)\] \pause
+    \item Form {upper confidence-bounds} of sequence values: \[ V(a) \leq U_a \quad \text{w.h.p}\] \pause
+    \item Sample the sequence with highest UCB: \[\argmax_a U_a\]
+\end{enumerate}
+\end{block}
+\end{frame}
+
 \begin{frame}{The idea behind \OLOP}
 \begin{center}
 \includesvg[width=0.8\textwidth]{img/olop-explain}
 \end{center}
-% \begin{center}
-% \scalebox{0.7}{
-% \begin{algorithm}[H]
-% \DontPrintSemicolon
-% \footnotesize
-% \For{each episode $m = 1, \cdots, M$}{
-% Compute $U_a(m-1)$ from \eqref{eq:Ua} for all $a\in\mathcal{T}$\;
-% Compute $B_a(m-1)$ from \eqref{eq:Ba} for all $a\in A^L$\;\label{alg:b_values_compute}
-% Sample a sequence with highest B-value: $a^m \in \argmax_{a\in A^L} B_a(m-1)$.\;
-% }
-% \Return the most played sequence $a(n) \in \argmax_{a\in A^L} T_a(M)$
-% \caption{General structure for Open-Loop Optimistic Planning}
-% \label{algo:kl-olop}
-% \end{algorithm}}
-% \end{center}
 \end{frame}
 
 \begin{frame}{The idea behind \OLOP}
 \begin{center}
 \includesvg[width=0.8\textwidth]{img/olop-explain-2}
 \end{center}
-% \begin{center}
-% \scalebox{0.7}{
-% \begin{algorithm}[H]
-% \DontPrintSemicolon
-% \footnotesize
-% \For{each episode $m = 1, \cdots, M$}{
-% Compute $U_a(m-1)$ from \eqref{eq:Ua} for all $a\in\mathcal{T}$\;
-% Compute $B_a(m-1)$ from \eqref{eq:Ba} for all $a\in A^L$\;
-% Sample a sequence with highest B-value: $a^m \in \argmax_{a\in A^L} B_a(m-1)$.\;
-% }
-% \Return the most played sequence $a(n) \in \argmax_{a\in A^L} T_a(M)$
-% \caption{General structure for Open-Loop Optimistic Planning}
-% \end{algorithm}}
-% \end{center}
+\end{frame}
+
+
+\begin{frame}{Under the hood}
+\begin{block}{Upper-bounding the value of sequences}
+
+\end{block}
+\begin{align*}
+  \only<1>{V(a) =  \overbrace{\sum_{t=1}^h \gamma^t \mu_{a_{1:t}}}^{\text{follow the sequence}} + \overbrace{\sum_{t\geq h+1} \gamma^t \mu_{a^*_{1:t}}}^{\text{act optimally}} \\}
+  \only<2>{V(a) =  \overbrace{\sum_{t=1}^h \gamma^t \underbrace{\mu_{a_{1:t}}}_{\leq U^\mu}}^{\text{follow the sequence}} + \overbrace{\sum_{t\geq h+1} \gamma^t \underbrace{\mu_{a^*_{1:t}}}_{\leq 1}}^{\text{act optimally}} \\}
+\end{align*}
+
 \end{frame}
 
 \begin{frame}{Under the hood}
@@ -389,6 +381,24 @@ An \hlb{exploration-exploitation} problem.
     \end{block}
 \end{frame}
 
+
+\begin{frame}{\OLOP guarantees}
+\begin{theorem}[\OLOP Sample complexity]
+\label{thm:regret}
+\OLOP satisfies:
+\begin{equation*}
+    \expectedvalue r_n = \begin{cases}
+      \tilde{\cO}\left(n^{-\frac{\log 1/\gamma}{\log \kappa'}}\right), & \text{if}\ \gamma\sqrt{\kappa'} > 1 \\
+      \tilde{\cO}\left(n^{-\frac{1}{2}}\right), & \text{if}\ \gamma\sqrt{\kappa'} \leq 1
+    \end{cases}
+\end{equation*}
+\end{theorem}
+\begin{center}
+    \emph{"Remarkably, in the case $\kappa \gamma^2 > 1$, we obtain the same rate for the simple regret as Hren and Munos (2008). Thus, in this case, we can say that planning in stochastic environments is not harder than planning in deterministic environments".}
+\end{center}
+\end{frame}
+
+
 \begin{frame}{Does it work?}
 \begin{center}
     \includesvg[width=0.7\textwidth]{img/hw_return_olop_fail} \\
@@ -400,24 +410,20 @@ Make \OLOP \emph{practical}.
 \end{frame}
 
 \begin{frame}{What's wrong with \OLOP?}
-    Overly optimistic, especially in the low-budget regime.
-
-    \begin{alertblock}{Intuitive explanation}
+    \begin{alertblock}{Explanation: inconsistency}
     \begin{itemize}
         \item Unintended behaviour happens when $\hler{U^{\mu}_a(m) > 1}, \forall a$.
         \begin{equation*}
              U^{\mu}_a(m) = \underbrace{\hat{\mu}_a(m)}_{\in [0,1]} + \underbrace{\sqrt{\frac{2 \log M}{T_a(m)}}}_{> 0}
         \end{equation*}
         \pause
-        \item Then the sequence $(U_{a_{1:t}}(m))_t$ is non-decreasing
-        \begin{equation*}
-        U_a(m) = \sum_{t=1}^h \gamma^t U^{\mu}_{a_{1:t}}(m) + \frac{\gamma^{h+1}}{1-\gamma}
-        \end{equation*}
+        \item Then the sequence $(U_{a_{1:t}}(m))_t$ is increasing
+        \begin{align*}
+        U_{a_{1:1}}(m) &=   \textcolor{gray}{\gamma U^{\mu}_{a_{1}}(m)} + \gamma^2 1 &+ \textcolor{gray}{\gamma^3 1 + \dots} \\
+        U_{a_{1:2}}(m) &=  \textcolor{gray}{\gamma U^{\mu}_{a_{1}}(m)} + \gamma^2 \underbrace{U^{\mu}_{a_{2}}}_{>1} &+ \textcolor{gray}{\gamma^3 1 + \dots}
+        \end{align*}
         \pause
         \item Then \hlr{$B_a(m) = U_{a_{1:1}}(m)$}
-        \begin{equation*}
-        B_a(m) = \inf_{1 \leq t \leq L} U_{a_{1:t}}(m)
-        \end{equation*}
     \end{itemize}
     \end{alertblock}
     
@@ -442,20 +448,20 @@ Make \OLOP \emph{practical}.
 \end{flushright}
 \end{frame}
 
-\begin{frame}{What's wrong with \OLOP?}
-    \begin{block}{How long does it last?}
-    \begin{itemize}
-        \item Recall: unintended behaviour happens when $\hler{U^{\mu}_a(m) > 1}, \forall a$.
-    \begin{equation*}
-         U^{\mu}_a(m) = \underbrace{\hat{\mu}_a(m)}_{\in [0,1]} + \underbrace{\sqrt{\frac{2 \log M}{T_a(m)}}}_{> 0}
-    \end{equation*}
-    \pause
-    \item[\incarrow] $U^{\mu}_a(m)$ decreases as $\cO\left(1/\sqrt{T_a(m)}\right)$
-    \pause
-    \item[\incarrow] The issue lasts longer where $\underbrace{\hat{\mu}_a(m) \simeq 1}_{\text{near-optimal regions}}$
-    \end{itemize}
-    \end{block}
-\end{frame}
+% \begin{frame}{What's wrong with \OLOP?}
+%     \begin{block}{How long does it last?}
+%     \begin{itemize}
+%         \item As long as $\hler{U^{\mu}_a(m) > 1}, \forall a$.
+%     \begin{equation*}
+%          U^{\mu}_a(m) = \underbrace{\hat{\mu}_a(m)}_{\in [0,1]} + \underbrace{\sqrt{\frac{2 \log M}{T_a(m)}}}_{> 0}
+%     \end{equation*}
+%     \pause
+%     \item[\incarrow] $U^{\mu}_a(m)$ decreases as $\cO\left(1/\sqrt{T_a(m)}\right)$
+%     \pause
+%     \item[\incarrow] The issue lasts longer where $\underbrace{\hat{\mu}_a(m) \simeq 1}_{\text{near-optimal regions}}$
+%     \end{itemize}
+%     \end{block}
+% \end{frame}
 
 \begin{frame}{Our contribution: Kullback-Leibler \OLOP}
     We summon the upper-confidence bound from \texttt{kl-UCB} [\cite{Cappe2013}]:
@@ -552,6 +558,36 @@ And now,
         \frametitle{References}
         \printbibliography
 \end{frame}
+
+\begin{frame}{}
+\begin{center}
+    \Huge Thank You.
+\end{center}
+\end{frame}
+
+% \begin{frame}{Takeway message}
+% \begin{columns}
+% \begin{column}{0.66\linewidth}
+% \begin{block}{Beware of the gap between theory and practice}
+% \small
+%     \begin{itemize}
+%         \item<1-> Asymptotic bounds are good indicators...
+%         \item<2-> but they do not always tell the whole story.
+%         \item<3-> Time is finite, and constants matter.
+%     \end{itemize}
+% \end{block}
+% \end{column}
+% \begin{column}{0.33\linewidth}
+% \includegraphics[width=\linewidth]{img/mind-the-gap}
+% \end{column}
+% \end{columns}
+% \pause
+% \pause
+% \pause
+% \begin{center}
+%     \Huge Thank You.
+% \end{center}
+% \end{frame}
 
 \end{document}
 
