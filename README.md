@@ -36,6 +36,10 @@ We evaluate the expected return obtained by these algorithms with respect to the
 
 ### Install requirements
 
+```shell
+pip install -r requirements.txt
+```
+
 * The environments:
   * [highway-env](https://github.com/eleurent/highway-env)
   * [gym-minigrid](https://github.com/eleurent/gym-minigrid)
@@ -46,7 +50,6 @@ We evaluate the expected return obtained by these algorithms with respect to the
 ```shell
 cd <path-to-rl-agents>/scripts/
 python planners_evaluation.py
-```
 
 ### Usage
 ```

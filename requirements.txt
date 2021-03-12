@@ -1,3 +1,3 @@
-git+git://github.com/eleurent/highway-env.git@master#egg=highway-env
+highway-env
 git+git://github.com/eleurent/rl-agents.git@master#egg=rl-agents
 git+git://github.com/eleurent/gym-minigrid.git@master#egg=gym-minigrid
